@@ -7,8 +7,9 @@ import type { AppState, Entry, Session } from './types';
 
 const NOW = new Date('2026-11-02T18:00:00Z');
 
+/** Seeded state, rewound to the start of the week with no history. */
 function fresh(): AppState {
-  return initialState(NOW);
+  return { ...initialState(), day: 0, sessions: [] };
 }
 
 function entry(s: Session, key: string): Entry {
@@ -16,6 +17,16 @@ function entry(s: Session, key: string): Entry {
   if (!e) throw new Error(key);
   return e;
 }
+
+describe('seed from the Oct 27 workout', () => {
+  it('starts at Upper A with squat and split squat numbers', () => {
+    const st = initialState();
+    expect(st.day).toBe(1);
+    expect(st.sessions).toHaveLength(1);
+    expect(st.lifts.back_squat.e1rm).toBeCloseTo(estimate1RM(235, 3, 9), 0);
+    expect(st.lifts.rfess.load).toBe(15);
+  });
+});
 
 describe('rpe math', () => {
   it('1 rep at RPE 10 is 100%', () => {

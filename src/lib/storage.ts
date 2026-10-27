@@ -1,22 +1,62 @@
 import { estimate1RM } from './rpe';
-import type { AppState } from './types';
+import type { AppState, Session } from './types';
 
 const KEY = 'gym-planner:v1';
 
-/** Starting point, seeded from the numbers you gave (squat 235×4 treated as a max-effort 4, incline DB 40×6). */
-export function initialState(now: Date = new Date()): AppState {
-  const date = now.toISOString();
-  const squat = Math.round(estimate1RM(235, 4, 10) * 10) / 10;
+/** Date of the seed workout (Lower A, done before the app existed). */
+export const SEED_DATE = '2026-10-27T18:00:00.000Z';
+
+/**
+ * Starting point, seeded from the workout you logged on Oct 27:
+ *   Back squat 225×4, then 235 for 4 sets of 3
+ *   Bulgarian split squat 15 lb dumbbells, 4×8
+ * Squat estimate assumes the last 235×3 set was RPE 9 (~1 rep left).
+ * Incline DB 40×6 comes from what you reported earlier.
+ * That workout counts as Lower A, so the program starts at Upper A.
+ */
+export function initialState(): AppState {
+  const date = SEED_DATE;
+  const squat = Math.round(estimate1RM(235, 3, 9) * 10) / 10;
+  const seed: Session = {
+    id: 'seed-2026-10-27',
+    date,
+    week: 1,
+    day: 0,
+    readiness: 'ok',
+    entries: [
+      {
+        slotKey: 'd1-main',
+        exerciseId: 'back_squat',
+        scheme: { type: 'topBackoff' },
+        planned: [
+          { kind: 'top', reps: 4, rpe: 8 },
+          ...Array.from({ length: 4 }, () => ({ kind: 'backoff' as const, reps: 3, rpe: 9 })),
+        ],
+        logged: [
+          { load: 225, reps: 4 },
+          ...Array.from({ length: 4 }, () => ({ load: 235, reps: 3 })),
+        ],
+      },
+      {
+        slotKey: 'd1-single',
+        exerciseId: 'rfess',
+        scheme: { type: 'double', sets: 4, repMin: 6, repMax: 10, rir: 2 },
+        planned: Array.from({ length: 4 }, () => ({ kind: 'work' as const, reps: 6, repMax: 10, rir: 2, load: 15 })),
+        logged: Array.from({ length: 4 }, () => ({ load: 15, reps: 8 })),
+      },
+    ],
+  };
   return {
     version: 1,
     week: 1,
-    day: 0,
+    day: 1,
     lifts: {
-      back_squat: { e1rm: squat, missStreak: 0, history: [{ date, value: squat }] },
+      back_squat: { e1rm: squat, missStreak: 0, lastDone: date, history: [{ date, value: squat }] },
+      rfess: { load: 15, missStreak: 0, lastDone: date, history: [{ date, value: 15 }] },
       incline_db: { load: 40, missStreak: 0, history: [{ date, value: 40 }] },
     },
     swaps: {},
-    sessions: [],
+    sessions: [seed],
     settings: { restMainSec: 180, restAccSec: 90, barWeight: 45 },
   };
 }
