@@ -5,4 +5,6 @@ import react from '@vitejs/plugin-react';
 export default defineConfig({
   base: './',
   plugins: [react()],
+  // Firebase lives in its own lazily loaded chunk.
+  build: { chunkSizeWarningLimit: 800 },
 });

@@ -1,10 +1,11 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import Plan from './components/Plan';
 import Progress from './components/Progress';
 import SettingsView from './components/Settings';
 import Workout from './components/Workout';
 import { loadState, saveState } from './lib/storage';
 import type { AppState } from './lib/types';
+import { useCloudSync } from './lib/useCloudSync';
 
 type Tab = 'workout' | 'progress' | 'plan' | 'settings';
 
@@ -25,7 +26,16 @@ export default function App() {
     saveState(state);
   }, [state]);
 
-  const update: Update = (fn) => setState((s) => fn(s));
+  // Local edits bump updatedAt so cloud sync knows this copy is newer.
+  const update: Update = (fn) =>
+    setState((s) => {
+      const next = fn(s);
+      return next === s ? s : { ...next, updatedAt: Math.max(Date.now(), s.updatedAt + 1) };
+    });
+  const replace = (next: AppState) => update(() => next);
+  // Changes that came from the cloud keep their timestamp.
+  const applyRemote = useCallback((fn: (s: AppState) => AppState) => setState(fn), []);
+  const sync = useCloudSync(state, applyRemote);
 
   return (
     <div className="app">
@@ -33,7 +43,7 @@ export default function App() {
         {tab === 'workout' && <Workout state={state} update={update} />}
         {tab === 'progress' && <Progress state={state} />}
         {tab === 'plan' && <Plan state={state} />}
-        {tab === 'settings' && <SettingsView state={state} update={update} replace={setState} />}
+        {tab === 'settings' && <SettingsView state={state} update={update} replace={replace} sync={sync} />}
       </main>
       <nav className="tabs" aria-label="Sections">
         {TABS.map((t) => (
