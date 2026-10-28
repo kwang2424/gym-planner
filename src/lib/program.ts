@@ -153,6 +153,8 @@ export interface WeekInfo {
   weekInBlock: number; // 0..3
   deload: boolean;
   test: boolean; // last week of the cycle: heavy single
+  /** Heavy single at ~RPE 8 before the top set (Build and Peak blocks). */
+  single: boolean;
   /** Main lift top set. */
   topReps: number;
   topRpe: number;
@@ -172,7 +174,9 @@ export function weekInfo(week: number): WeekInfo {
   const weekInBlock = cw % 4;
   const deload = weekInBlock === 3;
   const test = deload && block === 2;
-  const topReps = [6, 4, 3][block];
+  // Heavier than a classic hypertrophy block: strength gains are largest
+  // with heavy loads, and reps-left guesses are most accurate on low-rep sets.
+  const topReps = [5, 4, 3][block];
   const straightReps = [6, 5, 4][block];
 
   let topRpe = 7 + block * 0.5 + weekInBlock * 0.5;
@@ -188,10 +192,12 @@ export function weekInfo(week: number): WeekInfo {
     straightRpe = 6;
     label = 'Test week · heavy single, then rest up';
   } else if (deload) {
-    topRpe = 6;
-    backoffSets = 1;
+    // Lighter week = cut volume, keep some heavy practice: a full week off
+    // mid-program blunted strength gains (Coleman et al. 2024).
+    topRpe = 7;
+    backoffSets = Math.max(1, Math.floor(backoffSets / 2));
     straightSets = 2;
-    straightRpe = 6;
+    straightRpe = 6.5;
     label = `${BLOCK_NAMES[block]} · lighter week`;
   }
 
@@ -203,6 +209,7 @@ export function weekInfo(week: number): WeekInfo {
     weekInBlock,
     deload,
     test,
+    single: block >= 1 && !deload,
     topReps: test ? 1 : topReps,
     topRpe,
     backoffSets,

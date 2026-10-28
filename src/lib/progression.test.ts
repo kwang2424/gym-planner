@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { weekInfo } from './program';
-import { applySession, buildSession, replan } from './progression';
+import { applySession, buildSession, effectiveRpe, isMiss, replan } from './progression';
 import { estimate1RM, loadFor, pctOf1RM } from './rpe';
 import { initialState } from './storage';
 import type { AppState, Entry, Session } from './types';
@@ -46,13 +46,17 @@ describe('rpe math', () => {
 
 describe('weekInfo', () => {
   it('ramps effort and drops reps across blocks', () => {
-    expect(weekInfo(1)).toMatchObject({ topReps: 6, topRpe: 7, deload: false });
-    expect(weekInfo(3)).toMatchObject({ topReps: 6, topRpe: 8 });
-    expect(weekInfo(4)).toMatchObject({ deload: true, topRpe: 6 });
-    expect(weekInfo(5)).toMatchObject({ topReps: 4, topRpe: 7.5 });
-    expect(weekInfo(11)).toMatchObject({ topReps: 3, topRpe: 9 });
-    expect(weekInfo(12)).toMatchObject({ test: true, topReps: 1, backoffSets: 0 });
-    expect(weekInfo(13)).toMatchObject({ cycle: 2, topReps: 6, topRpe: 7 });
+    expect(weekInfo(1)).toMatchObject({ topReps: 5, topRpe: 7, deload: false, single: false });
+    expect(weekInfo(3)).toMatchObject({ topReps: 5, topRpe: 8 });
+    expect(weekInfo(5)).toMatchObject({ topReps: 4, topRpe: 7.5, single: true });
+    expect(weekInfo(11)).toMatchObject({ topReps: 3, topRpe: 9, single: true });
+    expect(weekInfo(12)).toMatchObject({ test: true, topReps: 1, backoffSets: 0, single: false });
+    expect(weekInfo(13)).toMatchObject({ cycle: 2, topReps: 5, topRpe: 7 });
+  });
+
+  it('lighter weeks cut volume but keep a heavy-ish top set', () => {
+    expect(weekInfo(4)).toMatchObject({ deload: true, topRpe: 7, backoffSets: 1, single: false });
+    expect(weekInfo(8)).toMatchObject({ deload: true, topRpe: 7, backoffSets: 1 });
   });
 });
 
@@ -61,7 +65,7 @@ describe('buildSession', () => {
     const s = buildSession(fresh(), 'good', NOW);
     const sq = entry(s, 'd1-main');
     expect(sq.exerciseId).toBe('back_squat');
-    expect(sq.planned[0]).toMatchObject({ kind: 'top', reps: 6, rpe: 7 });
+    expect(sq.planned[0]).toMatchObject({ kind: 'top', reps: 5, rpe: 7 });
     expect(sq.planned[0].load! % 5).toBe(0);
     expect(sq.planned).toHaveLength(4);
   });
@@ -196,7 +200,7 @@ describe('applySession', () => {
       const e = s.entries[i];
       s.entries[i] = { ...e, logged: e.planned.map((p) => ({ load: 125, reps: p.reps, rir: 3 })) };
     });
-    expect(state.lifts.bench.e1rm).toBeCloseTo(estimate1RM(125, 6, 7), 0);
+    expect(state.lifts.bench.e1rm).toBeCloseTo(estimate1RM(125, 5, 6.75), 0); // 3 reported left, +0.25 bias correction
   });
 
   it('double progression: bumps at top of range, holds in range, drops after two misses', () => {
@@ -218,5 +222,81 @@ describe('applySession', () => {
     const st = fresh();
     const { state } = finish(st, () => {});
     expect(state.lifts.back_squat).toEqual(st.lifts.back_squat);
+  });
+});
+
+describe('heavier, evidence-aligned progression', () => {
+  it('adds a heavy single before the top set in Build/Peak blocks', () => {
+    const st = { ...fresh(), week: 5 };
+    const sq = entry(buildSession(st, 'good', NOW), 'd1-main');
+    expect(sq.planned[0]).toMatchObject({ kind: 'single', reps: 1, rpe: 8 });
+    expect(sq.planned[1].kind).toBe('top');
+    expect(sq.planned[0].load!).toBeGreaterThan(sq.planned[1].load!);
+  });
+
+  it('skips the single on a rough day', () => {
+    const sq = entry(buildSession({ ...fresh(), week: 5 }, 'rough', NOW), 'd1-main');
+    expect(sq.planned[0].kind).toBe('top');
+  });
+
+  it('an easy single raises the top set; a grinder lowers it', () => {
+    const sq = entry(buildSession({ ...fresh(), week: 5 }, 'good', NOW), 'd1-main');
+    const blank = sq.planned.map(() => null);
+    const easy = replan({ ...sq, logged: [{ load: sq.planned[0].load!, reps: 1, rir: 4 }, ...blank.slice(1)] }, 45);
+    const hard = replan({ ...sq, logged: [{ load: sq.planned[0].load!, reps: 1, rir: 0 }, ...blank.slice(1)] }, 45);
+    expect(easy.planned[1].load!).toBeGreaterThan(sq.planned[1].load!);
+    expect(easy.planned[1].load!).toBeLessThanOrEqual(Math.ceil((sq.planned[1].load! * 1.05) / 5) * 5);
+    expect(hard.planned[1].load!).toBeLessThan(sq.planned[1].load!);
+  });
+
+  it('e1RM is updated from the top set, not the single', () => {
+    const st = { ...fresh(), week: 5 };
+    const s = buildSession(st, 'good', NOW);
+    const i = s.entries.findIndex((e) => e.slotKey === 'd1-main');
+    const e = s.entries[i];
+    s.entries[i] = {
+      ...e,
+      logged: e.planned.map((p) => ({ load: p.load!, reps: p.reps, rir: p.kind === 'single' ? 0 : 10 - p.rpe! })),
+    };
+    const { state } = applySession(st, s);
+    // Top set hit exactly on target: not counted as a miss.
+    expect(state.lifts.back_squat.missStreak).toBe(0);
+  });
+
+  it('a made set with no reps-left logged never lowers the estimate (the 12-week test covers the climb)', () => {
+    const st = fresh();
+    const before = st.lifts.back_squat.e1rm!;
+    const s = buildSession(st, 'good', NOW);
+    const i = s.entries.findIndex((e) => e.slotKey === 'd1-main');
+    s.entries[i] = { ...s.entries[i], logged: s.entries[i].planned.map((p) => ({ load: p.load!, reps: p.reps })) };
+    expect(applySession(st, s).state.lifts.back_squat.e1rm!).toBeGreaterThanOrEqual(before);
+  });
+
+  it('adds back a quarter rep to reported reps-left, except at 0', () => {
+    const plan = { kind: 'top' as const, reps: 5, rpe: 8 };
+    expect(effectiveRpe({ load: 200, reps: 5, rir: 2 }, plan)).toBe(7.75);
+    expect(effectiveRpe({ load: 200, reps: 5, rir: 0 }, plan)).toBe(10);
+  });
+
+  it('reporting one rep fewer left than planned is not a miss (normal guessing error)', () => {
+    const plan = { kind: 'top' as const, reps: 5, rpe: 8 };
+    expect(isMiss({ load: 200, reps: 5, rir: 1 }, plan)).toBe(false); // RPE 9 vs 8
+    expect(isMiss({ load: 200, reps: 5, rir: 0 }, plan)).toBe(true); // RPE 10 vs 8
+  });
+
+  it('12 weeks of hitting targets moves the squat estimate meaningfully', () => {
+    let st: AppState = fresh();
+    let t = NOW.getTime();
+    const start = st.lifts.back_squat.e1rm!;
+    for (let n = 0; n < 48; n++) {
+      const s = buildSession(st, 'ok', new Date(t));
+      for (const e of s.entries) e.logged = e.planned.map((p) => ({ load: p.load ?? 0, reps: p.reps }));
+      st = applySession(st, s).state;
+      t += 2 * 86_400_000;
+    }
+    const gain = st.lifts.back_squat.e1rm! / start - 1;
+    // Roughly 0.5–1% a week when every target is simply met.
+    expect(gain).toBeGreaterThan(0.04);
+    expect(gain).toBeLessThan(0.15);
   });
 });
