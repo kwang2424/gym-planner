@@ -36,13 +36,15 @@ npm test         # progression engine tests
 npm run build    # production build in dist/
 ```
 
-## Deploy (Vercel)
+## Deploy (GitHub Pages)
 
-1. Sign in at [vercel.com](https://vercel.com) with GitHub → **Add New → Project** → import `gym-planner`.
-2. Keep the detected Vite settings and tap **Deploy**. Every push to `main` redeploys.
-3. Open the URL on your phone and choose **Share → Add to Home Screen**.
+Every push to `main` runs `.github/workflows/deploy.yml`, which tests, builds and publishes `dist/` to the `gh-pages` branch.
 
-CI (`.github/workflows/ci.yml`) runs the tests and build on every PR and every push to `main`.
+- Site: **https://kwang2424.github.io/gym-planner/**
+- If the site 404s after the first deploy, turn Pages on once: **Settings → Pages → Source: Deploy from a branch → `gh-pages` / root**.
+- On your phone, open the site and choose **Share → Add to Home Screen**.
+
+CI (`.github/workflows/ci.yml`) runs the tests and build on every PR.
 
 ## Data & cloud sync
 
