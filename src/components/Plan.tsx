@@ -36,6 +36,31 @@ const SOURCES = [
     url: 'https://www.ncbi.nlm.nih.gov/pmc/articles/PMC8762534/',
   },
   {
+    claim: 'Planned (periodized) programs give slightly larger 1RM gains than unplanned ones.',
+    cite: 'Moesgaard et al. 2022, Sports Med',
+    url: 'https://pubmed.ncbi.nlm.nih.gov/35044672/',
+  },
+  {
+    claim: 'Heavier loads build more 1RM strength, so blocks are 5s → 3s with heavy singles.',
+    cite: 'Lopez et al. 2021, Med Sci Sports Exerc',
+    url: 'https://mdpi-res.com/d_attachment/ijerph/ijerph-18-11237/article_deploy/ijerph-18-11237.pdf',
+  },
+  {
+    claim: 'Lifters underestimate reps left by ~1 rep, most accurately on low-rep sets near failure.',
+    cite: 'Halperin et al. 2022, Sports Med',
+    url: 'https://sportrxiv.org/index.php/server/preprint/view/67',
+  },
+  {
+    claim: 'A full week off mid-program blunted strength gains, so lighter weeks keep a heavy top set.',
+    cite: 'Coleman et al. 2024, PeerJ',
+    url: 'https://peerj.com/articles/16777',
+  },
+  {
+    claim: 'Adding reps or adding load both work for accessories (double progression).',
+    cite: 'Plotkin et al. 2022, PeerJ',
+    url: 'https://peerj.com/articles/14142',
+  },
+  {
     claim: 'Adductor strengthening cut groin strains sharply in pro hockey players.',
     cite: 'NHL groin-injury research (Tyler et al.)',
     url: 'https://read.qxmd.com/read/11528328/risk-factors-for-groin-injuries-in-hockey',
@@ -57,8 +82,9 @@ export default function Plan({ state }: { state: AppState }) {
         <p className="eyebrow">Plan</p>
         <h1>12-week strength cycle</h1>
         <p className="muted">
-          Upper/lower, 4 days. Three 4-week blocks: reps drop and effort rises, then a lighter week. Week 12 is a heavy
-          single to test your new max, then the cycle repeats from your updated numbers.
+          Upper/lower, 4 days. Three 4-week blocks (5s → 4s → 3s): effort rises each week, then a lighter week that cuts
+          volume but keeps a heavy top set. Build and Peak add a heavy single for practice. Week 12 tests your new max, then
+          the cycle repeats from your updated numbers.
         </p>
       </header>
 
@@ -78,7 +104,8 @@ export default function Plan({ state }: { state: AppState }) {
                 <td>{w.week}</td>
                 <td>{w.test ? 'Test' : w.deload ? 'Lighter' : w.blockName}</td>
                 <td>
-                  {w.topReps} @ RPE {w.topRpe}
+                  {w.single ? '1 @ 8, then ' : ''}
+                  {w.topReps} @ {w.topRpe}
                 </td>
                 <td>{w.backoffSets ? `${w.backoffSets}×${w.topReps}` : '—'}</td>
               </tr>
@@ -113,7 +140,9 @@ export default function Plan({ state }: { state: AppState }) {
       <h2 className="section-title">How it adapts</h2>
       <div className="card prose">
         <ul>
-          <li>Weights come from your estimated max and the target effort (RPE). Log reps-left when you can — it sharpens the estimate.</li>
+          <li>Weights come from your estimated max and the target effort (RPE). Reps-left is required on the top set — it's the set your estimate is built on.</li>
+          <li>Hitting your targets nudges the estimate up (~0.5–1% a week). Sets that feel easier than planned move it faster; harder sets pull it back.</li>
+          <li>People tend to guess about one rep too few left, so the app adds back a quarter rep and only treats a set as “too hard” when it's 1.5+ RPE over target.</li>
           <li>Top set harder than planned? Back-offs recalculate on the spot. Missed reps on a back-off or accessory drops the rest of that exercise.</li>
           <li>One rough session only moves your estimate halfway down. Two misses in a row resets it a little below what you did, so you rebuild.</li>
           <li>Accessories: hit the top of the rep range on every set and the weight goes up next time.</li>

@@ -11,7 +11,7 @@
 //    little, so you can build back up.
 //  - Coming back after 2+ weeks off a lift: loads start 5% lighter.
 import { DAYS, exercise, weekInfo } from './program';
-import { estimate1RM, loadFor, roundTo } from './rpe';
+import { estimate1RM, loadFor, pctOf1RM, roundTo } from './rpe';
 import type {
   AppState,
   Entry,
@@ -26,6 +26,20 @@ import type {
 const DAY_MS = 86_400_000;
 export const DETRAIN_DAYS = 14;
 export const MAX_GAIN_PER_SESSION = 0.05;
+/** Sets you made without logging reps-left count as this much easier than the target. */
+export const UNREPORTED_CREDIT_RPE = 0.25;
+/**
+ * Lifters underestimate reps left by ~1 rep on average (Halperin et al. 2022).
+ * A quarter rep is added back to a reported reps-left (not to 0, where guesses
+ * are most accurate). Kept small so steady sessions add up to ~0.5–1% a week.
+ */
+export const RIR_REPORT_CORRECTION = 0.25;
+/**
+ * A completed set only counts as a miss when it felt this much harder than the
+ * target. People tend to report ~1 rep fewer left than they really had
+ * (Halperin et al. 2022), so a 1-RPE overshoot is within normal guessing error.
+ */
+export const MISS_RPE_MARGIN = 1.5;
 
 export function emptyLift(): LiftState {
   return { missStreak: 0, history: [] };
@@ -39,11 +53,15 @@ function round(ex: ExerciseDef, value: number, barWeight: number): number {
   return roundTo(value, ex.increment || 5, minLoad(ex, barWeight));
 }
 
-/** RPE implied by a logged set: reported RIR if given; otherwise target if reps were made, else failure. */
+/**
+ * RPE implied by a logged set: reported RIR (lightly bias-corrected) if given. Otherwise a set where
+ * the reps were made counts as slightly easier than the target (so steady
+ * work still nudges the estimate up), and a short set counts as failure.
+ */
 export function effectiveRpe(set: LoggedSet, plan: PlannedSet): number {
-  if (set.rir !== undefined) return 10 - set.rir;
+  if (set.rir !== undefined) return 10 - (set.rir > 0 ? set.rir + RIR_REPORT_CORRECTION : 0);
   const target = plan.rpe ?? (plan.rir !== undefined ? 10 - plan.rir : 8);
-  return set.reps >= plan.reps ? target : 10;
+  return set.reps >= plan.reps ? target - UNREPORTED_CREDIT_RPE : 10;
 }
 
 export function setE1RM(set: LoggedSet, plan: PlannedSet): number {
@@ -53,8 +71,14 @@ export function setE1RM(set: LoggedSet, plan: PlannedSet): number {
 /** True when the set fell short of what was prescribed. */
 export function isMiss(set: LoggedSet, plan: PlannedSet): boolean {
   if (set.reps < plan.reps) return true;
-  if (plan.rpe !== undefined && set.rir !== undefined && 10 - set.rir >= plan.rpe + 1) return true;
+  if (plan.rpe !== undefined && set.rir !== undefined && 10 - set.rir >= plan.rpe + MISS_RPE_MARGIN) return true;
   return false;
+}
+
+/** Index of the anchor set (top set, or the calibration set) in a top+back-off entry. */
+export function topIndex(entry: Pick<Entry, 'planned'>): number {
+  const i = entry.planned.findIndex((p) => p.kind === 'top' || p.kind === 'calibrate');
+  return i < 0 ? 0 : i;
 }
 
 export function resolveExerciseId(state: AppState, slotKey: string, defaultId: string): string {
@@ -92,6 +116,10 @@ export function buildSession(state: AppState, readiness: Readiness, now: Date = 
         const rpe = Math.max(6, info.topRpe - (rough ? 1 : 0));
         const backRpe = Math.max(5, rpe - 1);
         const nBack = Math.max(info.backoffSets > 0 ? 1 : 0, info.backoffSets - (rough ? 1 : 0));
+        if (info.single && e1rm && !rough) {
+          // Heavy-load practice before the top set.
+          planned.push({ kind: 'single', reps: 1, rpe: 8, load: round(ex, loadFor(e1rm, 1, 8), bar) });
+        }
         planned.push({
           kind: e1rm ? 'top' : 'calibrate',
           reps: info.topReps,
@@ -123,7 +151,7 @@ export function buildSession(state: AppState, readiness: Readiness, now: Date = 
       }
     } else if (scheme.type === 'double') {
       const n = Math.max(1, scheme.sets - (lighter ? 1 : 0) - (rough ? 1 : 0));
-      const rir = scheme.rir + (lighter ? 2 : 0) + (rough ? 1 : 0);
+      const rir = scheme.rir + (lighter ? 1 : 0) + (rough ? 1 : 0);
       const fixedZero = ex.increment === 0;
       let load = fixedZero ? 0 : lift?.load;
       if (load !== undefined && stale && load > 0) {
@@ -175,16 +203,26 @@ export function replan(entry: Entry, barWeight: number): Entry {
   const open = (i: number) => entry.logged[i] === null;
 
   if (scheme.type === 'topBackoff') {
-    const top = entry.logged[0];
-    if (top) {
-      let e1 = setE1RM(top, entry.planned[0]);
-      const backMisses = entry.logged.slice(1).filter((s, k) => s && isMiss(s, entry.planned[k + 1])).length;
+    const ti = topIndex(entry);
+    const top = entry.logged[ti];
+    const single = ti > 0 ? entry.logged[0] : null;
+    // Re-plan from the heaviest information we have: the top set, else the single.
+    let anchor = top ? setE1RM(top, entry.planned[ti]) : single ? setE1RM(single, entry.planned[0]) : undefined;
+    // One rep is a noisy signal: an easy single can raise the plan by at most 5%.
+    const plannedTop = entry.planned[ti];
+    if (!top && single && anchor !== undefined && plannedTop.load !== undefined) {
+      const plannedE1 = plannedTop.load / pctOf1RM(plannedTop.reps, plannedTop.rpe ?? 7);
+      anchor = Math.min(anchor, plannedE1 * (1 + MAX_GAIN_PER_SESSION));
+    }
+    if (anchor !== undefined) {
+      const backMisses = entry.logged.filter((x, i) => i > ti && x && isMiss(x, entry.planned[i])).length;
       const factor = Math.pow(0.95, backMisses);
-      for (let i = 1; i < planned.length; i++) {
+      for (let i = ti; i < planned.length; i++) {
         if (!open(i)) continue;
-        planned[i].load = round(ex, loadFor(e1, planned[i].reps, planned[i].rpe ?? 7) * factor, barWeight);
+        planned[i].load = round(ex, loadFor(anchor, planned[i].reps, planned[i].rpe ?? 7) * (i > ti ? factor : 1), barWeight);
       }
-      if (isMiss(top, entry.planned[0])) note = 'Top set was harder than planned — back-offs recalculated from it.';
+      if (!top && single && planned[ti].load !== entry.planned[ti].load) note = 'Top set adjusted from how your single moved.';
+      if (top && isMiss(top, entry.planned[ti])) note = 'Top set was harder than planned — back-offs recalculated from it.';
       if (backMisses > 0) note = `Missed reps on a back-off — dropped the rest ~${Math.round((1 - factor) * 100)}%.`;
     }
   } else if (scheme.type === 'straight') {
@@ -247,8 +285,11 @@ export function applySession(state: AppState, session: Session): { state: AppSta
 
     if (scheme.type === 'topBackoff' || scheme.type === 'straight') {
       const e1s = done.map((d) => setE1RM(d.set, d.plan));
-      const sessE1 = scheme.type === 'topBackoff' && entry.logged[0] ? e1s[0] : Math.max(...e1s);
-      const missed = done.some((d) => isMiss(d.set, d.plan));
+      const ti = topIndex(entry);
+      const topSet = scheme.type === 'topBackoff' ? entry.logged[ti] : null;
+      const sessE1 = topSet ? setE1RM(topSet, entry.planned[ti]) : Math.max(...e1s);
+      // The heavy single is practice; only the work sets decide a miss.
+      const missed = done.some((d) => d.plan.kind !== 'single' && isMiss(d.set, d.plan));
       const old = prev.e1rm;
       let next: number;
       let status: LiftChange['status'];

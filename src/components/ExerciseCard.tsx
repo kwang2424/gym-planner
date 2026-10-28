@@ -117,6 +117,9 @@ function SetRow({ index, plan, scheme, ex, barWeight, logged, prevLogged, onLog 
 
   const plates = hasLoad && ex.loadType === 'barbell' ? platesPerSide(load, barWeight) : null;
   const showRir = scheme.type !== 'fixed';
+  // The top set anchors your estimated max, so its reps-left is required.
+  const rirRequired = scheme.type === 'topBackoff' && (plan.kind === 'top' || plan.kind === 'calibrate');
+  const blocked = rirRequired && rir === undefined;
 
   return (
     <li className="set">
@@ -138,14 +141,21 @@ function SetRow({ index, plan, scheme, ex, barWeight, logged, prevLogged, onLog 
           min={0}
           onChange={setReps}
         />
-        <button className="check" aria-label="Log set" onClick={() => onLog({ load: hasLoad ? load : 0, reps, rir })}>
+        <button
+          className="check"
+          aria-label="Log set"
+          disabled={blocked}
+          onClick={() => onLog({ load: hasLoad ? load : 0, reps, rir })}
+        >
           ✓
         </button>
       </div>
       {plates && <p className="muted small plates">Per side: {plates}</p>}
       {showRir && (
         <div className="rir">
-          <span className="muted small">Reps left (optional)</span>
+          <span className={blocked ? 'small rir-needed' : 'muted small'}>
+            {rirRequired ? 'Reps left (needed)' : 'Reps left (optional)'}
+          </span>
           <div className="rir-chips">
             {RIR_CHIPS.map((n) => (
               <button

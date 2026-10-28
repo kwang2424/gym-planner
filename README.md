@@ -5,8 +5,8 @@ A phone-first, offline web app (PWA) that plans and tracks a 4-day upper/lower s
 ## The program
 
 - **Split:** Lower A (squat) · Upper A (bench) · Lower B (pause squat + athletic) · Upper B (bench volume + back).
-- **12-week cycle:** three 4-week blocks (Base 6s → Build 4s → Peak 3s). Each block is 3 build weeks plus 1 lighter week. Week 12 is a heavy single, then the cycle repeats from your updated numbers.
-- **Main lifts:** one top set at a target RPE, then back-off sets. Loads come from your estimated max.
+- **12-week cycle:** three 4-week blocks (Base 5s → Build 4s → Peak 3s). Each block is 3 build weeks plus 1 lighter week, which halves back-off and accessory volume but keeps a top set at RPE 7. Week 12 is a heavy single, then the cycle repeats from your updated numbers.
+- **Main lifts:** one top set at a target RPE, then back-off sets. Build and Peak add a heavy single at RPE 8 first. Loads come from your estimated max.
 - **Accessories:** rep ranges with double progression (hit the top of the range on every set → add weight).
 - **Hockey:** box jumps and skater bounds for power, single-leg work, lateral lunges, plus Copenhagen planks and adductor work for groin-strain prevention. Lower-body volume is kept moderate for 2–3 skates a week.
 - **Shoulder-friendly:** paused bench with pain-free grip, no overhead pressing (chest-supported lateral raises instead), neutral-grip incline DB press, rotator-cuff work. One-tap swaps (floor press, pin press, neutral DB) for flare-up days.
@@ -25,7 +25,9 @@ A phone-first, offline web app (PWA) that plans and tracks a 4-day upper/lower s
 | "Beat up" check-in (e.g. after a hard skate) | One fewer set and easier targets that day |
 | 2+ weeks away from a lift | Comes back 5% lighter |
 
-Logging "reps left" (RIR) is optional but sharpens the estimates. If you don't log it, a set where you made the reps counts as being on target, and a set where you missed reps counts as being at failure.
+Reps left (RIR) is required on the top set and optional elsewhere. Because lifters tend to report about one rep fewer than they really had (Halperin et al. 2022), the app adds back a quarter rep. It only counts a completed set as "too hard" when it was 1.5+ RPE over target. A set you made without logging reps left counts as a quarter RPE easier than the target, and a set where you missed reps counts as failure. Simply hitting every target raises the estimated max by roughly 0.5–1% a week.
+
+The specific numbers (quarter-rep adjustment, halfway drop, 5% cap, 10% accessory drop) are tuning choices, not values taken from studies.
 
 ## Develop
 
@@ -72,5 +74,10 @@ To test locally against the emulators, set `VITE_FIREBASE_EMULATOR_HOST=127.0.0.
 - Pelland et al. 2024 (preprint): volume/frequency dose-response
 - Robinson et al. 2024, *Sports Med*: proximity to failure
 - Hickmott et al. 2022, *Sports Med Open*: autoregulation vs. percentage-based loading
+- Moesgaard et al. 2022, *Sports Med*: periodization and 1RM strength
+- Lopez et al. 2021: load and strength gains
+- Halperin et al. 2022, *Sports Med*: accuracy of reps-in-reserve estimates
+- Coleman et al. 2024, *PeerJ*: one-week deload during training
+- Plotkin et al. 2022, *PeerJ*: load vs. repetition progression
 - Tyler et al. 2001/2002, *AJSM*: adductor strength and groin strains in NHL players
 - Shire et al. 2017, *BMC Musculoskelet Disord*: exercise for subacromial impingement

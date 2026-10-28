@@ -258,3 +258,6 @@ button:disabled { opacity: 0.5; cursor: default; }
 .sync-status { margin: 8px 0 2px; font-weight: 600; }
 .sync-status.synced span { color: var(--good); }
 .sync-status.error span, .sync-status.pending span { color: var(--warn); }
+
+.rir-needed { color: var(--warn); font-weight: 600; }
+.check:disabled { background: var(--surface-2); color: var(--muted); }

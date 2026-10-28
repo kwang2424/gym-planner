@@ -25,6 +25,8 @@ export function fmtLb(n: number | undefined): string {
 
 export function setLabel(p: PlannedSet, index: number): string {
   switch (p.kind) {
+    case 'single':
+      return 'Heavy single';
     case 'top':
       return 'Top set';
     case 'backoff':

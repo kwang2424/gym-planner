@@ -51,7 +51,7 @@ export interface DayDef {
   slots: SlotDef[];
 }
 
-export type SetKind = 'top' | 'backoff' | 'work' | 'calibrate';
+export type SetKind = 'single' | 'top' | 'backoff' | 'work' | 'calibrate';
 
 export interface PlannedSet {
   kind: SetKind;
