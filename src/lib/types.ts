@@ -119,6 +119,8 @@ export interface Settings {
 
 export interface AppState {
   version: 1;
+  /** ms timestamp of the last local change; used to resolve cloud sync conflicts. 0 = untouched seed. */
+  updatedAt: number;
   week: number; // 1-based, keeps counting past 12 (cycles repeat)
   day: number; // 0..3
   lifts: Record<string, LiftState>;

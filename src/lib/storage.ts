@@ -48,6 +48,7 @@ export function initialState(): AppState {
   };
   return {
     version: 1,
+    updatedAt: 0,
     week: 1,
     day: 1,
     lifts: {
@@ -92,5 +93,6 @@ export function parseState(raw: string): AppState {
     swaps: data.swaps ?? {},
     sessions: data.sessions ?? [],
     settings: { ...base.settings, ...(data.settings ?? {}) },
+    updatedAt: typeof data.updatedAt === 'number' ? data.updatedAt : 0,
   } as AppState;
 }
