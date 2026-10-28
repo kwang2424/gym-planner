@@ -16,11 +16,15 @@ const list: ExerciseDef[] = [
   { id: 'floor_press', name: 'Floor press', loadType: 'barbell', increment: 5, cue: 'Shorter range, easier on the shoulder.', swaps: ['bench', 'pin_press', 'db_bench_neutral'] },
   { id: 'pin_press', name: 'Pin press', loadType: 'barbell', increment: 5, cue: 'Set pins just above the painful range.', swaps: ['bench', 'floor_press', 'db_bench_neutral'] },
   { id: 'db_bench_neutral', name: 'Neutral-grip DB bench', loadType: 'dumbbell', increment: 5, cue: 'Palms facing in. Load is per dumbbell.', swaps: ['bench', 'floor_press'] },
-  { id: 'landmine_press', name: 'Half-kneeling landmine press', loadType: 'machine', increment: 5, cue: 'Load = plates on the bar. Ribs down.', swaps: ['push_up', 'db_ohp_neutral'] },
-  { id: 'db_ohp_neutral', name: 'Neutral-grip DB shoulder press', loadType: 'dumbbell', increment: 5, cue: 'Only if pain-free. Per dumbbell.', swaps: ['landmine_press', 'push_up'] },
+  // No longer programmed; kept so older logged workouts still display.
+  { id: 'landmine_press', name: 'Half-kneeling landmine press', loadType: 'machine', increment: 5 },
   { id: 'incline_db', name: 'Incline DB press (neutral grip)', loadType: 'dumbbell', increment: 5, cue: 'Low incline (15–30°). Per dumbbell.', swaps: ['machine_incline', 'push_up'] },
   { id: 'machine_incline', name: 'Machine incline press', loadType: 'machine', increment: 5, swaps: ['incline_db', 'push_up'] },
   { id: 'push_up', name: 'Push-up', loadType: 'bodyweight', increment: 5, cue: 'Load = added weight (vest/plate).', swaps: ['incline_db'] },
+
+  // Shoulders (raises stay below shoulder height for the impingement)
+  { id: 'cs_lateral_raise', name: 'Chest-supported lateral raise', loadType: 'dumbbell', increment: 5, cue: 'Chest on an incline bench, raise to just below shoulder height. Per dumbbell.', swaps: ['cable_lateral_raise'] },
+  { id: 'cable_lateral_raise', name: 'Cable lateral raise', loadType: 'machine', increment: 2.5, cue: 'Raise to just below shoulder height.', swaps: ['cs_lateral_raise'] },
 
   // Pulling
   { id: 'cs_row', name: 'Chest-supported row', loadType: 'dumbbell', increment: 5, cue: 'Per dumbbell. Squeeze blades back.', swaps: ['cable_row', 't_bar_row'] },
@@ -100,7 +104,7 @@ export const DAYS: DayDef[] = [
     slots: [
       { key: 'd2-main', exerciseId: 'bench', scheme: { type: 'topBackoff' } },
       { key: 'd2-row', exerciseId: 'cs_row', scheme: { type: 'double', sets: 3, repMin: 8, repMax: 12, rir: 2 } },
-      { key: 'd2-press', exerciseId: 'landmine_press', scheme: { type: 'double', sets: 3, repMin: 8, repMax: 12, rir: 2 } },
+      { key: 'd2-delts', exerciseId: 'cs_lateral_raise', scheme: { type: 'double', sets: 3, repMin: 10, repMax: 15, rir: 1 } },
       { key: 'd2-vpull', exerciseId: 'pullup', scheme: { type: 'double', sets: 3, repMin: 5, repMax: 10, rir: 2 } },
       { key: 'd2-cuff', exerciseId: 'cable_er', scheme: { type: 'double', sets: 2, repMin: 12, repMax: 15, rir: 2 } },
       { key: 'd2-face', exerciseId: 'face_pull', scheme: { type: 'double', sets: 2, repMin: 12, repMax: 20, rir: 1 } },

@@ -9,7 +9,7 @@ A phone-first, offline web app (PWA) that plans and tracks a 4-day upper/lower s
 - **Main lifts:** one top set at a target RPE, then back-off sets. Loads come from your estimated max.
 - **Accessories:** rep ranges with double progression (hit the top of the range on every set → add weight).
 - **Hockey:** box jumps and skater bounds for power, single-leg work, lateral lunges, plus Copenhagen planks and adductor work for groin-strain prevention. Lower-body volume is kept moderate for 2–3 skates a week.
-- **Shoulder-friendly:** paused bench with pain-free grip, landmine press instead of overhead press, neutral grips, rotator-cuff work. One-tap swaps (floor press, pin press, neutral DB) for flare-up days.
+- **Shoulder-friendly:** paused bench with pain-free grip, no overhead pressing (chest-supported lateral raises instead), neutral-grip incline DB press, rotator-cuff work. One-tap swaps (floor press, pin press, neutral DB) for flare-up days.
 - **No conventional deadlift:** the hinge work is RDLs and hip thrusts.
 
 ## How it adapts when you miss
