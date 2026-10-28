@@ -36,9 +36,13 @@ npm test         # progression engine tests
 npm run build    # production build in dist/
 ```
 
-## Deploy (GitHub Pages)
+## Deploy (Vercel)
 
-`.github/workflows/deploy.yml` builds and deploys on every push to `main`. One-time setup: **Settings → Pages → Source: GitHub Actions**. Then open the site on your phone and choose **Add to Home Screen**.
+1. Sign in at [vercel.com](https://vercel.com) with GitHub → **Add New → Project** → import `gym-planner`.
+2. Keep the detected Vite settings and tap **Deploy**. Every push to `main` redeploys.
+3. Open the URL on your phone and choose **Share → Add to Home Screen**.
+
+CI (`.github/workflows/ci.yml`) runs the tests and build on every PR and every push to `main`.
 
 ## Data & cloud sync
 
