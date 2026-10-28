@@ -40,7 +40,25 @@ npm run build    # production build in dist/
 
 `.github/workflows/deploy.yml` builds and deploys on every push to `main`. One-time setup: **Settings → Pages → Source: GitHub Actions**. Then open the site on your phone and choose **Add to Home Screen**.
 
-Data is stored on the device (localStorage). Use **Settings → Export** for backups.
+## Data & cloud sync
+
+Workouts are always saved on the device first, so the app works offline at the gym. If Firebase is configured, signing in (Settings → Cloud backup) also syncs everything to Firestore and across devices:
+
+- `users/{uid}/meta/state`: program position, lift numbers, swaps, settings (last write wins, by `updatedAt`)
+- `users/{uid}/sessions/{id}`: one document per finished workout (merged as a union, never overwritten)
+- Offline changes are queued and uploaded when the phone is back online.
+- `firestore.rules` only lets each signed-in user read and write their own data.
+
+Without Firebase config the app runs on-device only. **Settings → Export** always works as a file backup.
+
+### Firebase setup (free Spark plan, doable from a phone browser)
+
+1. [console.firebase.google.com](https://console.firebase.google.com) → **Create project** (Analytics not needed).
+2. **Build → Authentication → Get started → Email/Password → Enable**.
+3. **Build → Firestore Database → Create database** (production mode). On the **Rules** tab, paste `firestore.rules` and **Publish**.
+4. **Project settings → Your apps → Web (`</>`)**: register the app and copy `apiKey`, `authDomain`, `projectId` and `appId` into `src/lib/firebaseConfig.ts`. Alternatively, set them as `VITE_FIREBASE_API_KEY`, `VITE_FIREBASE_AUTH_DOMAIN`, `VITE_FIREBASE_PROJECT_ID` and `VITE_FIREBASE_APP_ID` in your host's environment variables. These values are not secrets; the security rules protect the data.
+
+To test locally against the emulators, set `VITE_FIREBASE_EMULATOR_HOST=127.0.0.1` and run `firebase emulators:start --only auth,firestore`.
 
 ## Research basis
 

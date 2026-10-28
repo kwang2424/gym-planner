@@ -4,14 +4,17 @@ import { DAYS, exercise } from '../lib/program';
 import { emptyLift } from '../lib/progression';
 import { initialState, parseState } from '../lib/storage';
 import type { AppState } from '../lib/types';
+import type { CloudSync } from '../lib/useCloudSync';
+import CloudCard from './CloudCard';
 
 interface Props {
   state: AppState;
   update: Update;
   replace: (s: AppState) => void;
+  sync: CloudSync;
 }
 
-export default function SettingsView({ state, update, replace }: Props) {
+export default function SettingsView({ state, update, replace, sync }: Props) {
   const fileRef = useRef<HTMLInputElement>(null);
 
   const rows = DAYS.flatMap((d) => d.slots)
@@ -54,6 +57,8 @@ export default function SettingsView({ state, update, replace }: Props) {
         <p className="eyebrow">Settings</p>
         <h1>Numbers & setup</h1>
       </header>
+
+      <CloudCard sync={sync} />
 
       <div className="card">
         <h2>Where you are</h2>
@@ -159,9 +164,11 @@ export default function SettingsView({ state, update, replace }: Props) {
       </div>
 
       <div className="card">
-        <h2>Backup</h2>
+        <h2>Backup file</h2>
         <p className="muted small">
-          Data lives only on this device. Export now and then — it's your only copy.
+          {sync.email
+            ? 'A file copy of everything, in case you ever want one.'
+            : "Data lives only on this device. Export now and then — it's your only copy."}
         </p>
         <div className="btn-row">
           <button className="secondary" onClick={exportData}>
@@ -178,12 +185,16 @@ export default function SettingsView({ state, update, replace }: Props) {
             onChange={(e) => e.target.files?.[0] && importData(e.target.files[0])}
           />
         </div>
-        <button
-          className="danger"
-          onClick={() => confirm('Erase all workouts and numbers on this device?') && replace(initialState())}
-        >
-          Reset everything
-        </button>
+        {sync.email ? (
+          <p className="muted small">Sign out to reset this device.</p>
+        ) : (
+          <button
+            className="danger"
+            onClick={() => confirm('Erase all workouts and numbers on this device?') && replace(initialState())}
+          >
+            Reset everything
+          </button>
+        )}
       </div>
     </section>
   );
