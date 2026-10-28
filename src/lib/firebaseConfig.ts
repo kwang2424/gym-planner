@@ -5,10 +5,10 @@
 // Vercel → Project → Settings → Environment Variables). Leave empty to run
 // without cloud sync.
 const FILLED_IN = {
-  apiKey: '',
-  authDomain: '',
-  projectId: '',
-  appId: '',
+  apiKey: 'AIzaSyDVm3hfRC7lnUrO9LvvbDNGLEhnmzbFN-Y',
+  authDomain: 'gym-planner-24127.firebaseapp.com',
+  projectId: 'gym-planner-24127',
+  appId: '1:798558168709:web:8021225d458c7c7f83abec',
 };
 
 export interface FirebaseWebConfig {
