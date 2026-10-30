@@ -27,4 +27,8 @@ describe('program definition', () => {
     expect(DAYS[1].slots.map((s) => s.exerciseId)).toContain('cs_lateral_raise');
     expect(DAYS[3].slots.map((s) => s.exerciseId)).toEqual(expect.arrayContaining(['incline_db', 'pushdown']));
   });
+
+  it('Upper A puts pull-ups right after bench', () => {
+    expect(DAYS[1].slots.slice(0, 2).map((s) => s.exerciseId)).toEqual(['bench', 'pullup']);
+  });
 });
