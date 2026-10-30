@@ -57,6 +57,8 @@ export function initialState(): AppState {
       incline_db: { load: 40, missStreak: 0, history: [{ date, value: 40 }] },
       // Counterweight that allows ~10 reps (reported Oct 30).
       assisted_pullup: { load: 46, missStreak: 0, history: [{ date, value: 46 }] },
+      // Light dumbbells with 2.5 lb jumps (reported Oct 30).
+      cs_lateral_raise: { load: 7.5, missStreak: 0, history: [{ date, value: 7.5 }] },
     },
     swaps: {},
     sessions: [seed],

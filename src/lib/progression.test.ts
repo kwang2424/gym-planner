@@ -347,3 +347,20 @@ describe('assisted pull-ups (load = counterweight)', () => {
     expect(changes.find((c) => c.exerciseId === 'assisted_pullup')!.message).toMatch(/regular pull-ups/);
   });
 });
+
+describe('chest-supported lateral raises', () => {
+  it('start at 7.5 lb and move in 2.5 lb steps', () => {
+    const st = { ...fresh(), day: 1 };
+    const s = buildSession(st, 'good', NOW);
+    const i = s.entries.findIndex((e) => e.slotKey === 'd2-delts');
+    expect(s.entries[i].planned[0].load).toBe(7.5);
+    s.entries[i] = { ...s.entries[i], logged: s.entries[i].planned.map((p) => ({ load: p.load!, reps: 15 })) };
+    expect(applySession(st, s).state.lifts.cs_lateral_raise.load).toBe(10);
+  });
+
+  it('a 10% drop rounds to the nearest 2.5 lb', () => {
+    const e = entry(buildSession({ ...fresh(), day: 1 }, 'good', NOW), 'd2-delts');
+    const after = replan({ ...e, logged: [{ load: 15, reps: 6 }, null, null] }, 45);
+    expect(after.planned[1].load).toBe(12.5);
+  });
+});

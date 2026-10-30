@@ -23,7 +23,7 @@ const list: ExerciseDef[] = [
   { id: 'push_up', name: 'Push-up', loadType: 'bodyweight', increment: 5, cue: 'Load = added weight (vest/plate).', swaps: ['incline_db'] },
 
   // Shoulders (raises stay below shoulder height for the impingement)
-  { id: 'cs_lateral_raise', name: 'Chest-supported lateral raise', loadType: 'dumbbell', increment: 5, cue: 'Chest on an incline bench, raise to just below shoulder height. Per dumbbell.', swaps: ['cable_lateral_raise'] },
+  { id: 'cs_lateral_raise', name: 'Chest-supported lateral raise', loadType: 'dumbbell', increment: 2.5, cue: 'Chest on an incline bench, raise to just below shoulder height. Per dumbbell.', swaps: ['cable_lateral_raise'] },
   { id: 'cable_lateral_raise', name: 'Cable lateral raise', loadType: 'machine', increment: 2.5, cue: 'Raise to just below shoulder height.', swaps: ['cs_lateral_raise'] },
 
   // Pulling
