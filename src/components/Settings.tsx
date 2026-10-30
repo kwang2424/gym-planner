@@ -99,7 +99,7 @@ export default function SettingsView({ state, update, replace, sync }: Props) {
               <li key={r.id}>
                 <span>
                   {exercise(r.id).name}
-                  <span className="muted small"> · {r.e1rm ? 'est. max' : 'weight'}</span>
+                  <span className="muted small"> · {r.e1rm ? 'est. max' : exercise(r.id).assisted ? 'assist' : 'weight'}</span>
                 </span>
                 <input
                   key={`${r.id}-${value ?? ''}`}

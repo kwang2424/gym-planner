@@ -132,7 +132,7 @@ function SetRow({ index, plan, scheme, ex, barWeight, logged, prevLogged, onLog 
       </div>
       <div className="set-inputs">
         {hasLoad && (
-          <Stepper label="lb" value={load} step={step} min={0} onChange={setLoad} />
+          <Stepper label={ex.assisted ? 'lb assist' : 'lb'} value={load} step={step} min={0} onChange={setLoad} />
         )}
         <Stepper
           label={scheme.type === 'fixed' && scheme.unit === 'sec' ? 'sec' : 'reps'}

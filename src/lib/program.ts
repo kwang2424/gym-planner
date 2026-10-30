@@ -31,8 +31,9 @@ const list: ExerciseDef[] = [
   { id: 'cable_row', name: 'Seated cable row', loadType: 'machine', increment: 5, swaps: ['cs_row', 't_bar_row'] },
   { id: 't_bar_row', name: 'T-bar row', loadType: 'machine', increment: 5, swaps: ['cs_row', 'cable_row'] },
   { id: 'bb_row', name: 'Barbell row', loadType: 'barbell', increment: 5, cue: 'Torso ~45°, pull to lower ribs.', swaps: ['t_bar_row', 'cable_row'] },
-  { id: 'pullup', name: 'Neutral-grip pull-up', loadType: 'bodyweight', increment: 5, cue: 'Load = added weight (log 0 if bodyweight). If the bottom pinches your shoulder, stop just short of a dead hang or swap to pulldowns.', swaps: ['lat_pulldown'] },
-  { id: 'lat_pulldown', name: 'Neutral-grip lat pulldown', loadType: 'machine', increment: 5, swaps: ['pullup'] },
+  { id: 'assisted_pullup', name: 'Assisted pull-up (neutral grip)', loadType: 'machine', increment: 5, assisted: true, cue: 'Load = counterweight. Less assistance = progress. If the bottom pinches your shoulder, stop just short of full hang.', swaps: ['pullup', 'lat_pulldown'] },
+  { id: 'pullup', name: 'Neutral-grip pull-up', loadType: 'bodyweight', increment: 5, cue: 'Load = added weight (log 0 if bodyweight). If the bottom pinches your shoulder, stop just short of a dead hang or swap to pulldowns.', swaps: ['assisted_pullup', 'lat_pulldown'] },
+  { id: 'lat_pulldown', name: 'Neutral-grip lat pulldown', loadType: 'machine', increment: 5, swaps: ['pullup', 'assisted_pullup'] },
   { id: 'face_pull', name: 'Face pull', loadType: 'machine', increment: 5, cue: 'Pull to the eyes, rotate out.', swaps: ['band_pull_apart'] },
   { id: 'band_pull_apart', name: 'Band pull-apart', loadType: 'bodyweight', increment: 0, swaps: ['face_pull'] },
   { id: 'cable_er', name: 'Cable external rotation', loadType: 'machine', increment: 2.5, cue: 'Elbow at side, slow. Rotator-cuff health.', swaps: ['band_er'] },
@@ -104,7 +105,7 @@ export const DAYS: DayDef[] = [
     slots: [
       { key: 'd2-main', exerciseId: 'bench', scheme: { type: 'topBackoff' } },
       // Pull-ups go right after bench: strength gains are largest for exercises done first (Nunes et al. 2021).
-      { key: 'd2-vpull', exerciseId: 'pullup', scheme: { type: 'double', sets: 3, repMin: 5, repMax: 10, rir: 2 } },
+      { key: 'd2-vpull', exerciseId: 'assisted_pullup', scheme: { type: 'double', sets: 3, repMin: 5, repMax: 10, rir: 2 } },
       { key: 'd2-row', exerciseId: 'cs_row', scheme: { type: 'double', sets: 3, repMin: 8, repMax: 12, rir: 2 } },
       { key: 'd2-delts', exerciseId: 'cs_lateral_raise', scheme: { type: 'double', sets: 3, repMin: 10, repMax: 15, rir: 1 } },
       { key: 'd2-cuff', exerciseId: 'cable_er', scheme: { type: 'double', sets: 2, repMin: 12, repMax: 15, rir: 2 } },

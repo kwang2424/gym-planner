@@ -191,7 +191,7 @@ function Summary({ changes, onClose }: { changes: LiftChange[]; onClose: () => v
                 {c.before !== undefined && Math.round(c.before) !== Math.round(c.after)
                   ? `${fmtLb(Math.round(c.before))} → `
                   : ''}
-                {fmtLb(Math.round(c.after))} lb {c.kind === 'e1rm' ? 'est. max' : ''}
+                {fmtLb(Math.round(c.after))} lb {c.kind === 'e1rm' ? 'est. max' : exercise(c.exerciseId).assisted ? 'assist' : ''}
               </span>
             </div>
             <span className="muted small">

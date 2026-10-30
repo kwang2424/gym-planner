@@ -10,6 +10,8 @@ export interface ExerciseDef {
   cue?: string;
   /** Exercises that can stand in for this one (e.g. on a cranky-shoulder day). */
   swaps?: string[];
+  /** Load is counterweight/assistance: less is harder, so progress means going down. */
+  assisted?: boolean;
 }
 
 /** Heavy top set, then back-off sets — driven by the lift's estimated 1RM. */
