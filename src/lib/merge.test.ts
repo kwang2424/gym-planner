@@ -62,3 +62,16 @@ describe('session merge', () => {
     expect(sessionsToUpload(local, new Set(['a'])).map((s) => s.id)).toEqual(['b']);
   });
 });
+
+describe('default starting numbers', () => {
+  it('fill in lifts missing from older saves and cloud copies, without overriding logged ones', async () => {
+    const { parseState } = await import('./storage');
+    const old = { ...state(), lifts: { back_squat: { e1rm: 300, missStreak: 0, history: [] } } };
+    const parsed = parseState(JSON.stringify(old));
+    expect(parsed.lifts.back_squat.e1rm).toBe(300);
+    expect(parsed.lifts.assisted_pullup.load).toBe(46);
+    const fromCloud = applyRemoteMeta(state({ updatedAt: 1 }), { ...metaOf(old), updatedAt: 2 });
+    expect(fromCloud.lifts.back_squat.e1rm).toBe(300);
+    expect(fromCloud.lifts.assisted_pullup.load).toBe(46);
+  });
+});

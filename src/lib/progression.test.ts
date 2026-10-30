@@ -300,3 +300,50 @@ describe('heavier, evidence-aligned progression', () => {
     expect(gain).toBeLessThan(0.15);
   });
 });
+
+describe('assisted pull-ups (load = counterweight)', () => {
+  const upperA = (st: AppState) => ({ ...st, day: 1 });
+  const logPullups = (reps: number) => (s: Session) => {
+    const i = s.entries.findIndex((e) => e.slotKey === 'd2-vpull');
+    const e = s.entries[i];
+    s.entries[i] = { ...e, logged: e.planned.map((p) => ({ load: p.load!, reps })) };
+  };
+  function finish(st: AppState, mutate: (s: Session) => void) {
+    const s = buildSession(st, 'good', NOW);
+    mutate(s);
+    return applySession(st, s);
+  }
+
+  it('starts from the 46 lb counterweight', () => {
+    const e = entry(buildSession(upperA(fresh()), 'good', NOW), 'd2-vpull');
+    expect(e.exerciseId).toBe('assisted_pullup');
+    expect(e.planned[0].load).toBe(46);
+  });
+
+  it('hitting the top of the range removes assistance', () => {
+    const { state, changes } = finish(upperA(fresh()), logPullups(10));
+    expect(state.lifts.assisted_pullup.load).toBe(41);
+    expect(changes.find((c) => c.exerciseId === 'assisted_pullup')!.message).toMatch(/less assistance/);
+  });
+
+  it('two sessions below the range add assistance', () => {
+    const r1 = finish(upperA(fresh()), logPullups(3));
+    expect(r1.state.lifts.assisted_pullup.load).toBe(46);
+    const r2 = finish(upperA(r1.state), logPullups(3));
+    expect(r2.state.lifts.assisted_pullup.load).toBe(56);
+  });
+
+  it('missing the range mid-session adds assistance for the remaining sets', () => {
+    const e = entry(buildSession(upperA(fresh()), 'good', NOW), 'd2-vpull');
+    const after = replan({ ...e, logged: [{ load: 46, reps: 3 }, null, null] }, 45);
+    expect(after.planned[1].load).toBe(56);
+  });
+
+  it('never goes below zero assistance and suggests regular pull-ups', () => {
+    const st = upperA(fresh());
+    st.lifts = { ...st.lifts, assisted_pullup: { load: 0, missStreak: 0, history: [] } };
+    const { state, changes } = finish(st, logPullups(10));
+    expect(state.lifts.assisted_pullup.load).toBe(0);
+    expect(changes.find((c) => c.exerciseId === 'assisted_pullup')!.message).toMatch(/regular pull-ups/);
+  });
+});

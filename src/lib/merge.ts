@@ -6,6 +6,7 @@
 //
 // Sessions merge as a union by id. Everything else is last-writer-wins on
 // `updatedAt`, which every local change bumps.
+import { initialState } from './storage';
 import type { AppState, Session } from './types';
 
 export type CloudMeta = Omit<AppState, 'sessions'>;
@@ -23,7 +24,8 @@ export function applyRemoteMeta(local: AppState, remote: CloudMeta | null): AppS
     ...local,
     ...remote,
     settings: { ...local.settings, ...remote.settings },
-    lifts: remote.lifts ?? {},
+    // Default starting numbers fill in only for lifts the cloud copy doesn't have.
+    lifts: { ...initialState().lifts, ...(remote.lifts ?? {}) },
     swaps: remote.swaps ?? {},
     active: remote.active ?? undefined,
     sessions: local.sessions,

@@ -45,6 +45,17 @@ export function emptyLift(): LiftState {
   return { missStreak: 0, history: [] };
 }
 
+/** One step harder: more weight, or less assistance on assisted lifts. */
+function harder(ex: ExerciseDef, load: number): number {
+  return ex.assisted ? Math.max(0, load - ex.increment) : load + ex.increment;
+}
+
+/** Make a set easier: ~5% (small) or ~10% (big) lighter, or more assistance. */
+function easier(ex: ExerciseDef, load: number, barWeight: number, big: boolean): number {
+  if (ex.assisted) return load + ex.increment * (big ? 2 : 1);
+  return round(ex, load * (big ? 0.9 : 0.95), barWeight);
+}
+
 export function minLoad(ex: ExerciseDef, barWeight: number): number {
   return ex.loadType === 'barbell' ? barWeight : 0;
 }
@@ -154,15 +165,19 @@ export function buildSession(state: AppState, readiness: Readiness, now: Date = 
       const rir = scheme.rir + (lighter ? 1 : 0) + (rough ? 1 : 0);
       const fixedZero = ex.increment === 0;
       let load = fixedZero ? 0 : lift?.load;
-      if (load !== undefined && stale && load > 0) {
-        load = round(ex, load * 0.95, bar);
-        notes.push('Been 2+ weeks — eased off 5%.');
+      if (load !== undefined && stale && (load > 0 || ex.assisted)) {
+        load = easier(ex, load, bar, false);
+        notes.push(ex.assisted ? 'Been 2+ weeks — added a little assistance.' : 'Been 2+ weeks — eased off 5%.');
       }
       for (let i = 0; i < n; i++) {
         planned.push({ kind: 'work', reps: scheme.repMin, repMax: scheme.repMax, rir, load });
       }
       if (load === undefined) {
-        notes.push(`First time: pick a weight you could do for ~${scheme.repMax} reps with ${scheme.rir} left. It's remembered after this.`);
+        notes.push(
+          ex.assisted
+            ? `First time: pick the assistance that lets you do ~${scheme.repMax} reps with ${scheme.rir} left. It's remembered after this.`
+            : `First time: pick a weight you could do for ~${scheme.repMax} reps with ${scheme.rir} left. It's remembered after this.`,
+        );
       }
     } else {
       const n = Math.max(1, scheme.sets - (lighter || rough ? 1 : 0));
@@ -237,12 +252,12 @@ export function replan(entry: Entry, barWeight: number): Entry {
   } else if (scheme.type === 'double') {
     const last = entry.logged[lastIdx]!;
     let next = last.load;
-    if (last.reps < scheme.repMin && last.load > 0) {
-      next = round(ex, last.load * 0.9, barWeight);
-      note = 'Below the rep range — dropped ~10% for the rest.';
+    if (last.reps < scheme.repMin && (last.load > 0 || ex.assisted)) {
+      next = easier(ex, last.load, barWeight, true);
+      note = ex.assisted ? 'Below the rep range — added assistance for the rest.' : 'Below the rep range — dropped ~10% for the rest.';
     } else if (last.reps > scheme.repMax + 2 && ex.increment > 0) {
-      next = last.load + ex.increment;
-      note = 'Way past the range — bumped the weight.';
+      next = harder(ex, last.load);
+      note = ex.assisted ? 'Way past the range — less assistance.' : 'Way past the range — bumped the weight.';
     }
     for (let i = lastIdx + 1; i < planned.length; i++) {
       if (open(i) && ex.increment > 0) planned[i].load = next;
@@ -332,24 +347,30 @@ export function applySession(state: AppState, session: Session): { state: AppSta
       let message: string;
 
       if (allTop) {
-        next = base + ex.increment;
+        next = harder(ex, base);
         status = old === undefined ? 'new' : 'up';
-        message = 'Top of the range on every set — weight goes up.';
+        message = ex.assisted
+          ? next === 0
+            ? 'Top of the range with no assistance left — time to swap to regular pull-ups.'
+            : 'Top of the range on every set — less assistance next time.'
+          : 'Top of the range on every set — weight goes up.';
         lift.missStreak = 0;
       } else if (anyBelow) {
         lift.missStreak = prev.missStreak + 1;
         if (lift.missStreak >= 2) {
-          next = round(ex, base * 0.9, bar);
+          next = easier(ex, base, bar, true);
           status = 'reset';
-          message = 'Below the range twice in a row — dropped ~10%.';
+          message = ex.assisted ? 'Below the range twice in a row — added assistance.' : 'Below the range twice in a row — dropped ~10%.';
           lift.missStreak = 0;
         } else {
           status = 'hold';
-          message = 'Below the range — same weight next time.';
+          message = ex.assisted ? 'Below the range — same assistance next time.' : 'Below the range — same weight next time.';
         }
       } else {
         status = old === undefined ? 'new' : 'hold';
-        message = 'In the range — same weight, aim for more reps.';
+        message = ex.assisted
+          ? 'In the range — same assistance, aim for more reps.'
+          : 'In the range — same weight, aim for more reps.';
         lift.missStreak = 0;
       }
       lift.load = next;

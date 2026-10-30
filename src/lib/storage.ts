@@ -55,6 +55,8 @@ export function initialState(): AppState {
       back_squat: { e1rm: squat, missStreak: 0, lastDone: date, history: [{ date, value: squat }] },
       rfess: { load: 15, missStreak: 0, lastDone: date, history: [{ date, value: 15 }] },
       incline_db: { load: 40, missStreak: 0, history: [{ date, value: 40 }] },
+      // Counterweight that allows ~10 reps (reported Oct 30).
+      assisted_pullup: { load: 46, missStreak: 0, history: [{ date, value: 46 }] },
     },
     swaps: {},
     sessions: [seed],
@@ -89,7 +91,8 @@ export function parseState(raw: string): AppState {
   return {
     ...base,
     ...data,
-    lifts: data.lifts ?? {},
+    // Starting numbers added in later versions fill in only where nothing is logged yet.
+    lifts: { ...base.lifts, ...(data.lifts ?? {}) },
     swaps: data.swaps ?? {},
     sessions: data.sessions ?? [],
     settings: { ...base.settings, ...(data.settings ?? {}) },

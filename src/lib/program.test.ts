@@ -29,6 +29,6 @@ describe('program definition', () => {
   });
 
   it('Upper A puts pull-ups right after bench', () => {
-    expect(DAYS[1].slots.slice(0, 2).map((s) => s.exerciseId)).toEqual(['bench', 'pullup']);
+    expect(DAYS[1].slots.slice(0, 2).map((s) => s.exerciseId)).toEqual(['bench', 'assisted_pullup']);
   });
 });

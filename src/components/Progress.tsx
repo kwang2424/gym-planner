@@ -43,7 +43,9 @@ export default function Progress({ state }: { state: AppState }) {
 
           {current && (
             <div className="card">
-              <p className="field-label">{isE1rm ? 'Estimated max' : 'Working weight'}</p>
+              <p className="field-label">
+                {isE1rm ? 'Estimated max' : exercise(selected).assisted ? 'Assistance (lower is better)' : 'Working weight'}
+              </p>
               <p className="hero">
                 {fmtLb(Math.round(isE1rm ? current.e1rm! : current.load ?? 0))} <span className="unit">lb</span>
               </p>
