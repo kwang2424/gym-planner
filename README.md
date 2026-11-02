@@ -10,7 +10,7 @@ A phone-first, offline web app (PWA) that plans and tracks a 4-day upper/lower s
 - **Accessories:** rep ranges with double progression (hit the top of the range on every set → add weight).
 - **Hockey:** box jumps and skater bounds for power, single-leg work, lateral lunges, plus Copenhagen planks and adductor work for groin-strain prevention. Lower-body volume is kept moderate for 2–3 skates a week.
 - **Shoulder-friendly:** paused bench with pain-free grip, no overhead pressing (chest-supported lateral raises instead), neutral-grip incline DB press, rotator-cuff work. One-tap swaps (floor press, pin press, neutral DB) for flare-up days.
-- **No conventional deadlift:** the hinge work is RDLs and hip thrusts.
+- **No conventional deadlift:** the hinge work is RDLs and loaded 45° back extensions (swaps: single-leg RDL, cable pull-through). Pause squats stay on the barbell so they carry over to the squat.
 
 ## How it adapts when you miss
 
