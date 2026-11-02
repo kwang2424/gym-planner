@@ -31,4 +31,11 @@ describe('program definition', () => {
   it('Upper A puts pull-ups right after bench', () => {
     expect(DAYS[1].slots.slice(0, 2).map((s) => s.exerciseId)).toEqual(['bench', 'assisted_pullup']);
   });
+
+  it('Lower B uses back extensions, not hip thrusts', () => {
+    const ids = DAYS[2].slots.flatMap((s) => [s.exerciseId, ...(EXERCISES[s.exerciseId].swaps ?? [])]);
+    expect(DAYS[2].slots.map((s) => s.exerciseId)).toContain('back_ext');
+    expect(ids).not.toContain('hip_thrust');
+    expect(ids).not.toContain('glute_bridge_machine');
+  });
 });

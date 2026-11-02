@@ -9,7 +9,7 @@ const list: ExerciseDef[] = [
   { id: 'back_squat', name: 'Back squat', loadType: 'barbell', increment: 5, cue: 'Brace, sit between the hips, drive up.', swaps: ['ssb_squat', 'front_squat'] },
   { id: 'ssb_squat', name: 'Safety bar squat', loadType: 'barbell', increment: 5, cue: 'Easier on the shoulders than a straight bar.', swaps: ['back_squat', 'front_squat'] },
   { id: 'front_squat', name: 'Front squat', loadType: 'barbell', increment: 5, swaps: ['back_squat', 'ssb_squat'] },
-  { id: 'pause_squat', name: 'Pause squat (2s)', loadType: 'barbell', increment: 5, cue: 'Dead stop 2s in the hole, stay tight.', swaps: ['front_squat', 'ssb_squat'] },
+  { id: 'pause_squat', name: 'Pause squat (2s)', loadType: 'barbell', increment: 5, cue: 'Barbell, so it carries over to your squat. Dead stop 2s in the hole, stay tight.', swaps: ['front_squat', 'ssb_squat'] },
 
   // Bench / pressing
   { id: 'bench', name: 'Bench press (1s pause)', loadType: 'barbell', increment: 5, cue: 'Pain-free grip width, elbows ~45°, shoulder blades pinned.', swaps: ['floor_press', 'pin_press', 'db_bench_neutral'] },
@@ -42,9 +42,12 @@ const list: ExerciseDef[] = [
   // Hinge / posterior chain (no conventional deadlift)
   { id: 'rdl', name: 'Romanian deadlift', loadType: 'barbell', increment: 5, cue: 'Hips back, soft knees, stop at mid-shin.', swaps: ['db_rdl', 'back_ext'] },
   { id: 'db_rdl', name: 'DB Romanian deadlift', loadType: 'dumbbell', increment: 5, swaps: ['rdl', 'back_ext'] },
-  { id: 'hip_thrust', name: 'Barbell hip thrust', loadType: 'barbell', increment: 5, cue: 'Chin tucked, full lockout, 1s squeeze.', swaps: ['back_ext', 'glute_bridge_machine'] },
-  { id: 'glute_bridge_machine', name: 'Machine hip thrust', loadType: 'machine', increment: 5, swaps: ['hip_thrust', 'back_ext'] },
-  { id: 'back_ext', name: '45° back extension', loadType: 'bodyweight', increment: 5, cue: 'Load = plate held.', swaps: ['hip_thrust', 'rdl'] },
+  // No longer programmed; kept so older logged workouts still display.
+  { id: 'hip_thrust', name: 'Barbell hip thrust', loadType: 'barbell', increment: 5 },
+  { id: 'glute_bridge_machine', name: 'Machine hip thrust', loadType: 'machine', increment: 5 },
+  { id: 'back_ext', name: '45° back extension', loadType: 'bodyweight', increment: 5, cue: 'Load = plate held at chest (log 0 for bodyweight). Hinge at the hips, squeeze glutes at the top.', swaps: ['single_leg_rdl', 'cable_pull_through'] },
+  { id: 'single_leg_rdl', name: 'Single-leg DB RDL', loadType: 'dumbbell', increment: 5, cue: 'Per dumbbell, reps per leg. Hips square — balance carries over to skating.', swaps: ['back_ext', 'cable_pull_through'] },
+  { id: 'cable_pull_through', name: 'Cable pull-through', loadType: 'machine', increment: 5, cue: 'Rope between the legs, hips back, snap to lockout.', swaps: ['back_ext', 'single_leg_rdl'] },
   { id: 'leg_curl', name: 'Seated leg curl', loadType: 'machine', increment: 5, swaps: ['lying_leg_curl', 'nordic'] },
   { id: 'lying_leg_curl', name: 'Lying leg curl', loadType: 'machine', increment: 5, swaps: ['leg_curl', 'nordic'] },
   { id: 'nordic', name: 'Nordic curl (eccentric)', loadType: 'bodyweight', increment: 0, cue: 'Lower as slowly as you can.', swaps: ['leg_curl'] },
@@ -118,7 +121,7 @@ export const DAYS: DayDef[] = [
     slots: [
       { key: 'd3-power', exerciseId: 'skater_bound', scheme: { type: 'fixed', sets: 3, reps: 3, unit: 'reps', perSide: true } },
       { key: 'd3-main', exerciseId: 'pause_squat', scheme: { type: 'straight' } },
-      { key: 'd3-hip', exerciseId: 'hip_thrust', scheme: { type: 'double', sets: 3, repMin: 6, repMax: 10, rir: 2 } },
+      { key: 'd3-hip', exerciseId: 'back_ext', scheme: { type: 'double', sets: 3, repMin: 8, repMax: 12, rir: 2 } },
       { key: 'd3-lateral', exerciseId: 'lateral_lunge', scheme: { type: 'double', sets: 2, repMin: 6, repMax: 10, rir: 2 } },
       { key: 'd3-curl', exerciseId: 'leg_curl', scheme: { type: 'double', sets: 2, repMin: 8, repMax: 12, rir: 1 } },
       { key: 'd3-add', exerciseId: 'adductor_machine', scheme: { type: 'double', sets: 2, repMin: 10, repMax: 15, rir: 2 } },
