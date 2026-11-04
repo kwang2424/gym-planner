@@ -38,4 +38,9 @@ describe('program definition', () => {
     expect(ids).not.toContain('hip_thrust');
     expect(ids).not.toContain('glute_bridge_machine');
   });
+
+  it('direct ab work on both upper days', () => {
+    expect(DAYS[1].slots.map((s) => s.exerciseId)).toContain('dead_bug');
+    expect(DAYS[3].slots.map((s) => s.exerciseId)).toContain('cable_crunch');
+  });
 });

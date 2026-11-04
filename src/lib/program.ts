@@ -69,7 +69,9 @@ const list: ExerciseDef[] = [
   { id: 'skater_bound', name: 'Lateral skater bound', loadType: 'bodyweight', increment: 0, cue: 'Push sideways like a stride, stick 1s.', swaps: ['lateral_box_jump'] },
   { id: 'lateral_box_jump', name: 'Lateral box jump', loadType: 'bodyweight', increment: 0, swaps: ['skater_bound'] },
   { id: 'pallof', name: 'Pallof press', loadType: 'bodyweight', increment: 0, cue: 'Anti-rotation. 2s hold each rep.', swaps: ['dead_bug'] },
-  { id: 'dead_bug', name: 'Dead bug', loadType: 'bodyweight', increment: 0, swaps: ['pallof'] },
+  { id: 'dead_bug', name: 'Dead bug', loadType: 'bodyweight', increment: 0, cue: 'Low back pressed down, reach opposite arm and leg slowly. Arms stay below shoulder height if overhead pinches.', swaps: ['pallof'] },
+  { id: 'cable_crunch', name: 'Cable crunch', loadType: 'machine', increment: 5, cue: 'Kneel, rope by your head, curl ribs toward hips. Hips stay still.', swaps: ['machine_crunch'] },
+  { id: 'machine_crunch', name: 'Machine crunch', loadType: 'machine', increment: 5, swaps: ['cable_crunch'] },
 
   // Arms
   { id: 'db_curl', name: 'DB curl', loadType: 'dumbbell', increment: 5, swaps: ['cable_curl'] },
@@ -113,6 +115,7 @@ export const DAYS: DayDef[] = [
       { key: 'd2-delts', exerciseId: 'cs_lateral_raise', scheme: { type: 'double', sets: 3, repMin: 10, repMax: 15, rir: 1 } },
       { key: 'd2-cuff', exerciseId: 'cable_er', scheme: { type: 'double', sets: 2, repMin: 12, repMax: 15, rir: 2 } },
       { key: 'd2-face', exerciseId: 'face_pull', scheme: { type: 'double', sets: 2, repMin: 12, repMax: 20, rir: 1 } },
+      { key: 'd2-core', exerciseId: 'dead_bug', scheme: { type: 'fixed', sets: 2, reps: 8, unit: 'reps', perSide: true } },
     ],
   },
   {
@@ -138,6 +141,7 @@ export const DAYS: DayDef[] = [
       { key: 'd4-press', exerciseId: 'incline_db', scheme: { type: 'double', sets: 3, repMin: 6, repMax: 10, rir: 2 } },
       { key: 'd4-bi', exerciseId: 'db_curl', scheme: { type: 'double', sets: 2, repMin: 10, repMax: 15, rir: 1 } },
       { key: 'd4-tri', exerciseId: 'pushdown', scheme: { type: 'double', sets: 2, repMin: 10, repMax: 15, rir: 1 } },
+      { key: 'd4-abs', exerciseId: 'cable_crunch', scheme: { type: 'double', sets: 3, repMin: 10, repMax: 15, rir: 1 } },
     ],
   },
 ];
