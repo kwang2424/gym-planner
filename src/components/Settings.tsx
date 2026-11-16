@@ -120,6 +120,23 @@ export default function SettingsView({ state, update, replace, sync }: Props) {
       </div>
 
       <div className="card">
+        <h2>Hockey season</h2>
+        <label className="toggle">
+          <input
+            type="checkbox"
+            checked={state.settings.hockeySeason}
+            onChange={(e) => update((s) => ({ ...s, settings: { ...s.settings, hockeySeason: e.target.checked } }))}
+          />
+          <span>Playing 2–3 games a week</span>
+        </label>
+        <p className="muted small">
+          {state.settings.hockeySeason
+            ? 'Lower B is a short day: pause squats and back extensions lose a set; skater bounds and lateral lunges are dropped (games cover them). Lower A stays heavy — do it 48h+ before a game.'
+            : 'Off-season: the full Lower B with jumps and lateral work.'}
+        </p>
+      </div>
+
+      <div className="card">
         <h2>Gym</h2>
         <div className="grid2">
           <label>

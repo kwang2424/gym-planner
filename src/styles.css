@@ -261,3 +261,7 @@ button:disabled { opacity: 0.5; cursor: default; }
 
 .rir-needed { color: var(--warn); font-weight: 600; }
 .check:disabled { background: var(--surface-2); color: var(--muted); }
+
+.toggle { display: flex; align-items: center; gap: 10px; margin: 10px 0 6px; font-weight: 600; }
+.toggle input { width: 22px; height: 22px; accent-color: var(--accent); }
+.plan-list li.skipped span:first-child { color: var(--muted); text-decoration: line-through; }

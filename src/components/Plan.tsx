@@ -123,13 +123,18 @@ export default function Plan({ state }: { state: AppState }) {
           <ul className="plan-list">
             {d.slots.map((s) => {
               const id = state.swaps[s.key] ?? s.exerciseId;
+              const season = state.settings.hockeySeason;
+              const skipped = season && s.inSeason === 'skip';
               return (
-                <li key={s.key}>
+                <li key={s.key} className={skipped ? 'skipped' : undefined}>
                   <span>
                     {exercise(id).name}
                     {id !== s.exerciseId ? ' (swapped)' : ''}
                   </span>
-                  <span className="muted small">{schemeText(s.scheme)}</span>
+                  <span className="muted small">
+                    {skipped ? 'off-season only' : schemeText(s.scheme)}
+                    {season && s.inSeason === 'fewerSets' ? ' · −1 set in season' : ''}
+                  </span>
                 </li>
               );
             })}

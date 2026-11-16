@@ -62,7 +62,7 @@ export function initialState(): AppState {
     },
     swaps: {},
     sessions: [seed],
-    settings: { restMainSec: 180, restAccSec: 90, barWeight: 45 },
+    settings: { restMainSec: 180, restAccSec: 90, barWeight: 45, hockeySeason: true },
   };
 }
 
