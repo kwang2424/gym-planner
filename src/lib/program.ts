@@ -122,10 +122,12 @@ export const DAYS: DayDef[] = [
     name: 'Lower B',
     focus: 'Squat volume + athletic',
     slots: [
-      { key: 'd3-power', exerciseId: 'skater_bound', scheme: { type: 'fixed', sets: 3, reps: 3, unit: 'reps', perSide: true } },
-      { key: 'd3-main', exerciseId: 'pause_squat', scheme: { type: 'straight' } },
-      { key: 'd3-hip', exerciseId: 'back_ext', scheme: { type: 'double', sets: 3, repMin: 8, repMax: 12, rir: 2 } },
-      { key: 'd3-lateral', exerciseId: 'lateral_lunge', scheme: { type: 'double', sets: 2, repMin: 6, repMax: 10, rir: 2 } },
+      // In hockey season, games cover the jumping and lateral work, so this day
+      // shrinks to keep a second squat exposure plus groin/hamstring prehab.
+      { key: 'd3-power', exerciseId: 'skater_bound', scheme: { type: 'fixed', sets: 3, reps: 3, unit: 'reps', perSide: true }, inSeason: 'skip' },
+      { key: 'd3-main', exerciseId: 'pause_squat', scheme: { type: 'straight' }, inSeason: 'fewerSets' },
+      { key: 'd3-hip', exerciseId: 'back_ext', scheme: { type: 'double', sets: 3, repMin: 8, repMax: 12, rir: 2 }, inSeason: 'fewerSets' },
+      { key: 'd3-lateral', exerciseId: 'lateral_lunge', scheme: { type: 'double', sets: 2, repMin: 6, repMax: 10, rir: 2 }, inSeason: 'skip' },
       { key: 'd3-curl', exerciseId: 'leg_curl', scheme: { type: 'double', sets: 2, repMin: 8, repMax: 12, rir: 1 } },
       { key: 'd3-add', exerciseId: 'adductor_machine', scheme: { type: 'double', sets: 2, repMin: 10, repMax: 15, rir: 2 } },
       { key: 'd3-core', exerciseId: 'pallof', scheme: { type: 'fixed', sets: 2, reps: 10, unit: 'reps', perSide: true } },

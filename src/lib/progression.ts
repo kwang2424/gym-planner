@@ -106,7 +106,10 @@ export function buildSession(state: AppState, readiness: Readiness, now: Date = 
   const lighter = info.deload || info.test;
   const bar = state.settings.barWeight;
 
-  const entries: Entry[] = day.slots.map((slot) => {
+  const season = state.settings.hockeySeason;
+  const slots = season ? day.slots.filter((s) => s.inSeason !== 'skip') : day.slots;
+  const entries: Entry[] = slots.map((slot) => {
+    const trim = season && slot.inSeason === 'fewerSets' ? 1 : 0;
     const exId = resolveExerciseId(state, slot.key, slot.exerciseId);
     const ex = exercise(exId);
     const lift = state.lifts[exId];
@@ -149,7 +152,7 @@ export function buildSession(state: AppState, readiness: Readiness, now: Date = 
         if (!e1rm) notes.push(`No estimate yet: work up in small jumps to ${info.topReps} reps leaving ~${10 - rpe} in the tank. Log it and the back-offs fill in.`);
       } else {
         const rpe = Math.max(6, info.straightRpe - (rough ? 1 : 0));
-        const n = Math.max(1, info.straightSets - (rough ? 1 : 0));
+        const n = Math.max(1, info.straightSets - (rough ? 1 : 0) - trim);
         for (let i = 0; i < n; i++) {
           planned.push({
             kind: e1rm || i > 0 ? 'work' : 'calibrate',
@@ -161,7 +164,7 @@ export function buildSession(state: AppState, readiness: Readiness, now: Date = 
         if (!e1rm) notes.push(`No estimate yet: pick a weight for ${info.straightReps} reps leaving ~${10 - rpe} in the tank. The next sets adjust to it.`);
       }
     } else if (scheme.type === 'double') {
-      const n = Math.max(1, scheme.sets - (lighter ? 1 : 0) - (rough ? 1 : 0));
+      const n = Math.max(1, scheme.sets - (lighter ? 1 : 0) - (rough ? 1 : 0) - trim);
       const rir = scheme.rir + (lighter ? 1 : 0) + (rough ? 1 : 0);
       const fixedZero = ex.increment === 0;
       let load = fixedZero ? 0 : lift?.load;

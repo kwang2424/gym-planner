@@ -364,3 +364,43 @@ describe('chest-supported lateral raises', () => {
     expect(after.planned[1].load).toBe(12.5);
   });
 });
+
+describe('hockey season', () => {
+  const lowerB = (season: boolean) => {
+    const st = { ...fresh(), day: 2 };
+    st.settings = { ...st.settings, hockeySeason: season };
+    return buildSession(st, 'good', NOW);
+  };
+
+  it('is on by default', () => {
+    expect(fresh().settings.hockeySeason).toBe(true);
+  });
+
+  it('trims Lower B: no bounds or lateral lunges, one fewer pause-squat and back-extension set', () => {
+    const off = lowerB(false);
+    const on = lowerB(true);
+    const keys = (s: Session) => s.entries.map((e) => e.slotKey);
+    expect(keys(on)).not.toContain('d3-power');
+    expect(keys(on)).not.toContain('d3-lateral');
+    expect(keys(off)).toEqual(expect.arrayContaining(['d3-power', 'd3-lateral']));
+    expect(entry(on, 'd3-main').planned.length).toBe(entry(off, 'd3-main').planned.length - 1);
+    expect(entry(on, 'd3-hip').planned.length).toBe(entry(off, 'd3-hip').planned.length - 1);
+    // Groin/hamstring prehab stays.
+    expect(keys(on)).toEqual(expect.arrayContaining(['d3-curl', 'd3-add', 'd3-core']));
+  });
+
+  it('leaves Lower A and the upper days alone', () => {
+    for (const day of [0, 1, 3]) {
+      const st = { ...fresh(), day };
+      const off = buildSession({ ...st, settings: { ...st.settings, hockeySeason: false } }, 'good', NOW);
+      const on = buildSession(st, 'good', NOW);
+      expect(on.entries.map((e) => [e.slotKey, e.planned.length])).toEqual(off.entries.map((e) => [e.slotKey, e.planned.length]));
+    }
+  });
+
+  it('older saves pick up the setting as on', async () => {
+    const { parseState } = await import('./storage');
+    const old = { ...fresh(), settings: { restMainSec: 180, restAccSec: 90, barWeight: 45 } };
+    expect(parseState(JSON.stringify(old)).settings.hockeySeason).toBe(true);
+  });
+});

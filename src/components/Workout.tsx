@@ -32,7 +32,12 @@ export default function Workout({ state, update }: { state: AppState; update: Up
             Week {info.week} · {info.label}
           </p>
           <h1>{DAYS[state.day].name}</h1>
-          <p className="muted">{DAYS[state.day].focus}</p>
+          <p className="muted">
+            {DAYS[state.day].focus}
+            {state.settings.hockeySeason && DAYS[state.day].slots.some((s) => s.inSeason)
+              ? ' · hockey-season version'
+              : ''}
+          </p>
         </header>
 
         <div className="card">

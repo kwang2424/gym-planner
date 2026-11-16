@@ -45,6 +45,11 @@ export interface SlotDef {
   key: string;
   exerciseId: string;
   scheme: Scheme;
+  /**
+   * Hockey-season trim: 'skip' drops the exercise, 'fewerSets' does one set
+   * less. Games already supply sprinting, jumping and lateral work.
+   */
+  inSeason?: 'skip' | 'fewerSets';
 }
 
 export interface DayDef {
@@ -117,6 +122,8 @@ export interface Settings {
   restMainSec: number;
   restAccSec: number;
   barWeight: number;
+  /** Playing 2–3 games a week: Lower B is trimmed to a short squat + prehab day. */
+  hockeySeason: boolean;
 }
 
 export interface AppState {
