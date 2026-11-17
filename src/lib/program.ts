@@ -102,6 +102,8 @@ export const DAYS: DayDef[] = [
       { key: 'd1-hinge', exerciseId: 'rdl', scheme: { type: 'double', sets: 3, repMin: 6, repMax: 10, rir: 2 } },
       { key: 'd1-single', exerciseId: 'rfess', scheme: { type: 'double', sets: 2, repMin: 6, repMax: 10, rir: 2 } },
       { key: 'd1-groin', exerciseId: 'copenhagen', scheme: { type: 'fixed', sets: 2, reps: 20, unit: 'sec', perSide: true } },
+      // Abs live on the lower days so every session is ~6 exercises; always last, never before squats.
+      { key: 'd1-core', exerciseId: 'dead_bug', scheme: { type: 'fixed', sets: 2, reps: 8, unit: 'reps', perSide: true } },
     ],
   },
   {
@@ -115,7 +117,6 @@ export const DAYS: DayDef[] = [
       { key: 'd2-delts', exerciseId: 'cs_lateral_raise', scheme: { type: 'double', sets: 3, repMin: 10, repMax: 15, rir: 1 } },
       { key: 'd2-cuff', exerciseId: 'cable_er', scheme: { type: 'double', sets: 2, repMin: 12, repMax: 15, rir: 2 } },
       { key: 'd2-face', exerciseId: 'face_pull', scheme: { type: 'double', sets: 2, repMin: 12, repMax: 20, rir: 1 } },
-      { key: 'd2-core', exerciseId: 'dead_bug', scheme: { type: 'fixed', sets: 2, reps: 8, unit: 'reps', perSide: true } },
     ],
   },
   {
@@ -131,6 +132,7 @@ export const DAYS: DayDef[] = [
       { key: 'd3-curl', exerciseId: 'leg_curl', scheme: { type: 'double', sets: 2, repMin: 8, repMax: 12, rir: 1 } },
       { key: 'd3-add', exerciseId: 'adductor_machine', scheme: { type: 'double', sets: 2, repMin: 10, repMax: 15, rir: 2 } },
       { key: 'd3-core', exerciseId: 'pallof', scheme: { type: 'fixed', sets: 2, reps: 10, unit: 'reps', perSide: true } },
+      { key: 'd3-abs', exerciseId: 'cable_crunch', scheme: { type: 'double', sets: 3, repMin: 10, repMax: 15, rir: 1 } },
     ],
   },
   {
@@ -143,7 +145,6 @@ export const DAYS: DayDef[] = [
       { key: 'd4-press', exerciseId: 'incline_db', scheme: { type: 'double', sets: 3, repMin: 6, repMax: 10, rir: 2 } },
       { key: 'd4-bi', exerciseId: 'db_curl', scheme: { type: 'double', sets: 2, repMin: 10, repMax: 15, rir: 1 } },
       { key: 'd4-tri', exerciseId: 'pushdown', scheme: { type: 'double', sets: 2, repMin: 10, repMax: 15, rir: 1 } },
-      { key: 'd4-abs', exerciseId: 'cable_crunch', scheme: { type: 'double', sets: 3, repMin: 10, repMax: 15, rir: 1 } },
     ],
   },
 ];

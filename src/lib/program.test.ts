@@ -39,8 +39,17 @@ describe('program definition', () => {
     expect(ids).not.toContain('glute_bridge_machine');
   });
 
-  it('direct ab work on both upper days', () => {
-    expect(DAYS[1].slots.map((s) => s.exerciseId)).toContain('dead_bug');
-    expect(DAYS[3].slots.map((s) => s.exerciseId)).toContain('cable_crunch');
+  it('ab work is last on both lower days and off the upper days', () => {
+    expect(DAYS[0].slots.at(-1)!.exerciseId).toBe('dead_bug');
+    expect(DAYS[2].slots.at(-1)!.exerciseId).toBe('cable_crunch');
+    for (const d of [DAYS[1], DAYS[3]]) {
+      expect(d.slots.map((s) => s.exerciseId)).not.toEqual(expect.arrayContaining(['dead_bug']));
+      expect(d.slots.map((s) => s.exerciseId)).not.toEqual(expect.arrayContaining(['cable_crunch']));
+    }
+  });
+
+  it('every day has about 6 exercises (Lower B in hockey season)', () => {
+    const inSeason = (i: number) => DAYS[i].slots.filter((s) => s.inSeason !== 'skip').length;
+    expect([0, 1, 2, 3].map(inSeason)).toEqual([6, 6, 6, 6]);
   });
 });
