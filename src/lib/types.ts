@@ -124,6 +124,11 @@ export interface Settings {
   barWeight: number;
   /** Playing 2–3 games a week: Lower B is trimmed to a short squat + prehab day. */
   hockeySeason: boolean;
+  /**
+   * Per-exercise weight steps for your gym's equipment (e.g. a cable stack that
+   * goes 32.5 → 40 → 47.5 has a 7.5 lb step). Overrides the default increment.
+   */
+  steps: Record<string, number>;
 }
 
 export interface AppState {

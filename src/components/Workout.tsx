@@ -108,7 +108,7 @@ export default function Workout({ state, update }: { state: AppState; update: Up
     const entry = active.entries[i];
     const logged = entry.logged.slice();
     logged[setIdx] = set;
-    setEntry(i, replan({ ...entry, logged }, state.settings.barWeight));
+    setEntry(i, replan({ ...entry, logged }, state.settings.barWeight, state.settings.steps));
     if (set) {
       const total = isMain ? state.settings.restMainSec : state.settings.restAccSec;
       setRest({ endsAt: Date.now() + total * 1000, total });
@@ -155,6 +155,7 @@ export default function Workout({ state, update }: { state: AppState; update: Up
           key={`${e.slotKey}-${e.exerciseId}`}
           entry={e}
           barWeight={state.settings.barWeight}
+          steps={state.settings.steps}
           lift={state.lifts[e.exerciseId]}
           onLog={(setIdx, set) => log(i, setIdx, set, e.scheme.type === 'topBackoff' || e.scheme.type === 'straight')}
           onSwap={(id) => swap(i, id)}

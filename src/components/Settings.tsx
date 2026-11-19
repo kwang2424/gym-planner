@@ -33,6 +33,18 @@ export default function SettingsView({ state, update, replace, sync }: Props) {
     });
   };
 
+  /** Your gym's step for an exercise (e.g. a stack that goes 32.5 → 40 is 7.5). Blank = default. */
+  const setStep = (id: string, raw: string) => {
+    const v = raw.trim() === '' ? undefined : Number(raw);
+    if (v !== undefined && (!Number.isFinite(v) || v <= 0)) return;
+    update((s) => {
+      const steps = { ...s.settings.steps };
+      if (v === undefined) delete steps[id];
+      else steps[id] = v;
+      return { ...s, settings: { ...s.settings, steps } };
+    });
+  };
+
   const exportData = () => {
     const blob = new Blob([JSON.stringify(state, null, 2)], { type: 'application/json' });
     const a = document.createElement('a');
@@ -90,29 +102,48 @@ export default function SettingsView({ state, update, replace, sync }: Props) {
         <h2>Lift numbers</h2>
         <p className="muted small">
           Main lifts use an estimated max; accessories use your working weight. Clear a field to re-find it next session.
+          The small box is your gym's weight step for that exercise (e.g. 7.5 if the stack goes 32.5 → 40); leave it blank for the default.
         </p>
         <ul className="lift-edit">
           {rows.map((r) => {
             const lift = state.lifts[r.id];
-            const value = r.e1rm ? lift?.e1rm : lift?.load;
+            const raw = r.e1rm ? lift?.e1rm : lift?.load;
+            // Est. max to the nearest lb; working weights keep halves (7.5 lb dumbbells).
+            const value = raw === undefined ? undefined : r.e1rm ? Math.round(raw) : Math.round(raw * 10) / 10;
+            const ex = exercise(r.id);
+            const step = state.settings.steps[r.id];
             return (
               <li key={r.id}>
                 <span>
                   {exercise(r.id).name}
                   <span className="muted small"> · {r.e1rm ? 'est. max' : exercise(r.id).assisted ? 'assist' : 'weight'}</span>
                 </span>
-                <input
-                  key={`${r.id}-${value ?? ''}`}
-                  type="number"
-                  inputMode="decimal"
-                  placeholder="find it"
-                  defaultValue={value !== undefined ? Math.round(value) : ''}
-                  onBlur={(e) => {
-                    const cur = value !== undefined ? String(Math.round(value)) : '';
-                    if (e.target.value !== cur) setLiftValue(r.id, r.e1rm, e.target.value);
-                  }}
-                  aria-label={`${exercise(r.id).name} ${r.e1rm ? 'estimated max' : 'working weight'}`}
-                />
+                <div className="lift-inputs">
+                  <input
+                    key={`${r.id}-${value ?? ''}`}
+                    type="number"
+                    inputMode="decimal"
+                    placeholder="find it"
+                    defaultValue={value ?? ''}
+                    onBlur={(e) => {
+                      const cur = value !== undefined ? String(value) : '';
+                      if (e.target.value !== cur) setLiftValue(r.id, r.e1rm, e.target.value);
+                    }}
+                    aria-label={`${ex.name} ${r.e1rm ? 'estimated max' : 'working weight'}`}
+                  />
+                  {!r.e1rm && (
+                    <input
+                      key={`${r.id}-step-${step ?? ''}`}
+                      className="step-input"
+                      type="number"
+                      inputMode="decimal"
+                      placeholder={`±${ex.increment}`}
+                      defaultValue={step ?? ''}
+                      onBlur={(e) => setStep(r.id, e.target.value)}
+                      aria-label={`${ex.name} weight step`}
+                    />
+                  )}
+                </div>
               </li>
             );
           })}

@@ -404,3 +404,44 @@ describe('hockey season', () => {
     expect(parseState(JSON.stringify(old)).settings.hockeySeason).toBe(true);
   });
 });
+
+describe('custom weight steps (e.g. a 32.5 → 40 cable stack)', () => {
+  const upperB = () => {
+    const st = { ...fresh(), day: 3 };
+    st.lifts = { ...st.lifts, pushdown: { load: 32.5, missStreak: 0, history: [] } };
+    return st;
+  };
+  const logPushdowns = (reps: number) => (s: Session) => {
+    const i = s.entries.findIndex((e) => e.exerciseId === 'pushdown');
+    s.entries[i] = { ...s.entries[i], logged: s.entries[i].planned.map((p) => ({ load: p.load!, reps })) };
+  };
+  function finish(st: AppState, mutate: (s: Session) => void) {
+    const s = buildSession(st, 'good', NOW);
+    mutate(s);
+    return applySession(st, s);
+  }
+
+  it('rope pushdowns default to a 7.5 lb step', () => {
+    expect(fresh().settings.steps.pushdown).toBe(7.5);
+  });
+
+  it('progress goes to the next real plate: 32.5 → 40', () => {
+    expect(finish(upperB(), logPushdowns(15)).state.lifts.pushdown.load).toBe(40);
+  });
+
+  it('dropping moves one real step down, not to a weight the stack lacks', () => {
+    const e = buildSession(upperB(), 'good', NOW).entries.find((x) => x.exerciseId === 'pushdown')!;
+    const after = replan({ ...e, logged: [{ load: 40, reps: 5 }, null] }, 45, { pushdown: 7.5 });
+    expect(after.planned[1].load).toBe(32.5);
+    const r1 = finish(upperB(), logPushdowns(5));
+    const r2 = finish({ ...r1.state, day: 3 }, logPushdowns(5));
+    expect(r2.state.lifts.pushdown.load).toBe(25);
+  });
+
+  it('exercises without a custom step keep their default', () => {
+    const st = { ...fresh(), day: 3 };
+    st.settings = { ...st.settings, steps: {} };
+    st.lifts = { ...st.lifts, pushdown: { load: 30, missStreak: 0, history: [] } };
+    expect(finish(st, logPushdowns(15)).state.lifts.pushdown.load).toBe(35);
+  });
+});
