@@ -46,14 +46,27 @@ export function emptyLift(): LiftState {
 }
 
 /** One step harder: more weight, or less assistance on assisted lifts. */
+/** The exercise with your gym's step size applied, if you set one. */
+export function exerciseFor(id: string, steps: Record<string, number> = {}): ExerciseDef & { customStep?: boolean } {
+  const ex = exercise(id);
+  const step = steps[id];
+  return step && step > 0 ? { ...ex, increment: step, customStep: true } : ex;
+}
+
 function harder(ex: ExerciseDef, load: number): number {
   return ex.assisted ? Math.max(0, load - ex.increment) : load + ex.increment;
 }
 
 /** Make a set easier: ~5% (small) or ~10% (big) lighter, or more assistance. */
-function easier(ex: ExerciseDef, load: number, barWeight: number, big: boolean): number {
+function easier(ex: ExerciseDef & { customStep?: boolean }, load: number, barWeight: number, big: boolean): number {
   if (ex.assisted) return load + ex.increment * (big ? 2 : 1);
-  return round(ex, load * (big ? 0.9 : 0.95), barWeight);
+  const target = load * (big ? 0.9 : 0.95);
+  if (ex.customStep) {
+    // Move along the real stack (e.g. 40 → 32.5), at least one step down.
+    const steps = Math.max(1, Math.round((load - target) / ex.increment));
+    return Math.max(0, +(load - steps * ex.increment).toFixed(2));
+  }
+  return round(ex, target, barWeight);
 }
 
 export function minLoad(ex: ExerciseDef, barWeight: number): number {
@@ -111,7 +124,7 @@ export function buildSession(state: AppState, readiness: Readiness, now: Date = 
   const entries: Entry[] = slots.map((slot) => {
     const trim = season && slot.inSeason === 'fewerSets' ? 1 : 0;
     const exId = resolveExerciseId(state, slot.key, slot.exerciseId);
-    const ex = exercise(exId);
+    const ex = exerciseFor(exId, state.settings.steps);
     const lift = state.lifts[exId];
     const scheme = slot.scheme;
     const notes: string[] = [];
@@ -210,8 +223,8 @@ export function buildSession(state: AppState, readiness: Readiness, now: Date = 
 // ---------------------------------------------------------------------------
 // Live re-planning after each logged set
 // ---------------------------------------------------------------------------
-export function replan(entry: Entry, barWeight: number): Entry {
-  const ex = exercise(entry.exerciseId);
+export function replan(entry: Entry, barWeight: number, steps: Record<string, number> = {}): Entry {
+  const ex = exerciseFor(entry.exerciseId, steps);
   const { scheme } = entry;
   const planned = entry.planned.map((p) => ({ ...p }));
   let note = entry.note;
@@ -296,7 +309,7 @@ export function applySession(state: AppState, session: Session): { state: AppSta
       .map((s, i) => (s ? { set: s, plan: entry.planned[i] } : null))
       .filter((x): x is { set: LoggedSet; plan: PlannedSet } => x !== null);
     if (done.length === 0) continue;
-    const ex = exercise(entry.exerciseId);
+    const ex = exerciseFor(entry.exerciseId, state.settings.steps);
     const prev = lifts[ex.id] ?? emptyLift();
     const lift: LiftState = { ...prev, history: [...prev.history], lastDone: session.date };
     const { scheme } = entry;

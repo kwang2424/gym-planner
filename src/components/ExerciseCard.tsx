@@ -1,18 +1,21 @@
 import { useState } from 'react';
 import { fmtLb, platesPerSide, setLabel, targetText, tracksLoad } from '../lib/format';
 import { DAYS, exercise } from '../lib/program';
+import { exerciseFor } from '../lib/progression';
 import type { Entry, ExerciseDef, LiftState, LoggedSet, PlannedSet, Scheme } from '../lib/types';
 
 interface Props {
   entry: Entry;
   lift?: LiftState;
   barWeight: number;
+  /** Your gym's per-exercise weight steps (Settings). */
+  steps?: Record<string, number>;
   onLog: (setIdx: number, set: LoggedSet | null) => void;
   onSwap: (exerciseId: string) => void;
 }
 
-export default function ExerciseCard({ entry, lift, barWeight, onLog, onSwap }: Props) {
-  const ex = exercise(entry.exerciseId);
+export default function ExerciseCard({ entry, lift, barWeight, steps, onLog, onSwap }: Props) {
+  const ex = exerciseFor(entry.exerciseId, steps);
   const [showSwap, setShowSwap] = useState(false);
   const defaultId = DAYS.flatMap((d) => d.slots).find((s) => s.key === entry.slotKey)?.exerciseId;
   const options = Array.from(new Set([defaultId, ...(ex.swaps ?? [])].filter((id): id is string => !!id && id !== ex.id)));
